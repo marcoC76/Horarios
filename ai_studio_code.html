@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visor de Horarios CETIS 76</title>
+    <style>
+        body{font-family:system-ui,sans-serif;margin:0;background-color:#f4f6f9;color:#34495e}
+        .app-container{max-width:1600px;margin:0 auto;padding:15px}
+        header{background-color:#2c3e50;color:#ecf0f1;padding:20px;text-align:center;border-radius:8px;margin-bottom:20px;box-shadow:0 4px 6px #0000001a}
+        header h1{margin:0;font-size:1.8em}
+        .controls{display:flex;justify-content:center;align-items:center;gap:15px;padding:15px;background-color:#fff;border-radius:8px;margin-bottom:20px;box-shadow:0 4px 6px #0000001a}
+        #day-selector button{padding:10px 15px;border:1px solid #dee2e6;border-radius:5px;font-size:1em;background-color:#fff;cursor:pointer;transition:all .2s ease-in-out}
+        #day-selector button.active{background-color:#3498db;color:#fff;border-color:#3498db}
+        .schedule-container{overflow-x:auto;background-color:#fff;border-radius:8px;box-shadow:0 4px 6px #0000001a}
+        table{width:100%;border-collapse:collapse;white-space:nowrap}
+        th,td{border:1px solid #dee2e6;padding:12px;text-align:center;min-width:120px}
+        th{background-color:#e9ecef;font-weight:600;position:sticky;top:0;z-index:2}
+        td.row-header{font-weight:600;background-color:#f8f9fa;position:sticky;left:0;z-index:1}
+        .class-cell{padding:5px;font-size:.9em;cursor:pointer;border-radius:5px;color:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:60px;transition:transform .2s}
+        .class-cell:hover{transform:scale(1.05);z-index:10}
+        .cell-group{font-size:.9em}
+        .cell-teacher{font-size:1.1em;font-weight:700}
+        .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background-color:#00000080}
+        .modal-content{background-color:#fff;margin:10% auto;padding:25px;border-radius:8px;width:90%;max-width:500px;box-shadow:0 5px 15px #0000004d}
+        .modal-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #dee2e6;padding-bottom:15px;margin-bottom:15px}
+        .modal-header h2{margin:0;color:#2c3e50}
+        .close-button{color:#aaa;font-size:28px;font-weight:700;cursor:pointer}
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header><h1>Visor de Horarios CETIS 76</h1></header>
+        <div class="controls">
+            <div id="day-selector">
+                <button data-day="Lunes" class="active">L</button>
+                <button data-day="Martes">M</button>
+                <button data-day="Miércoles">X</button>
+                <button data-day="Jueves">J</button>
+                <button data-day="Viernes">V</button>
+            </div>
+        </div>
+        <div class="schedule-container"><table id="schedule-table"></table></div>
+    </div>
+    <div id="class-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h2 id="modal-title"></h2><span id="close-modal">&times;</span></div>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+    <script>
+        const data = [{"grupo":"1° A ENF","salon":"A7","dia":"Lunes","hora_inicio":"14:30","hora_fin":"15:20","materia":"La materia y sus interacciones","profesor":"Orozco Colin Asunción"},{"grupo":"1° A ENF","salon":"A7","dia":"Lunes","hora_inicio":"15:20","hora_fin":"16:10","materia":"La materia y sus interacciones","profesor":"Orozco Colin Asunción"}];
+        // Aquí iría el resto del array JSON completo de la respuesta anterior
+        const horariosData = [{"grupo":"1° A ENF","salon":"A7","dia":"Lunes","hora_inicio":"14:30","hora_fin":"15:20","materia":"La materia y sus interacciones","profesor":"Orozco Colin Asunción"},{"grupo":"1° A ENF","salon":"A7","dia":"Lunes","hora_inicio":"15:20","hora_fin":"16:10","materia":"La materia y sus interacciones","profesor":"Orozco Colin Asunción"},{"grupo":"1° A ENF","salon":"A7","dia":"Lunes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Lengua I","profesor":"Olvera Jiménez María Lina"},{"grupo":"1° A ENF","salon":"A7","dia":"Lunes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Lengua I","profesor":"Olvera Jiménez María Lina"},{"grupo":"1° A ENF","salon":"A7","dia":"Lunes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Lengua I","profesor":"Olvera Jiménez María Lina"},{"grupo":"1° A ENF","salon":"A7","dia":"Lunes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Socioemocional I","profesor":"Deveaux Gutiérrez José Juan Carlos"},{"grupo":"1° A ENF","salon":"A7","dia":"Lunes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1° A ENF","salon":"A7","dia":"Lunes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},
+        // Pega aquí el resto del JSON de la respuesta anterior
+        ];
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const table = document.getElementById('schedule-table');
+            const modal = document.getElementById('class-modal');
+            const daySelector = document.getElementById('day-selector');
+            const palette = ["#1abc9c", "#2ecc71", "#3498db", "#9b59b6", "#34495e", "#f1c40f", "#e67e22", "#e74c3c", "#7f8c8d", "#16a085", "#27ae60", "#2980b9", "#8e44ad", "#f39c12", "#d35400", "#c0392b"];
+
+            const getInitials = n => n.toLowerCase() === 'sin profesor' ? 'S/P' : n.split(' ').map(s => s[0]).join('').slice(0, 3);
+            const getColor = s => palette[s.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % palette.length];
+
+            const render = day => {
+                const dayData = horariosData.filter(i => i.dia === day);
+                const timeSlots = [...new Set(dayData.map(i => `${i.hora_inicio} - ${i.hora_fin}`))].sort();
+                const rooms = [...new Set(dayData.map(i => i.salon))].sort((a, b) => parseInt(a.slice(1)) - parseInt(b.slice(1)));
+
+                let headHTML = `<tr><th>Aula/Hora</th>${timeSlots.map(s => `<th>${s}</th>`).join('')}</tr>`;
+                let bodyHTML = rooms.map(room => {
+                    let rowHTML = `<td class="row-header">${room}</td>`;
+                    rowHTML += timeSlots.map(slot => {
+                        const [start, end] = slot.split(' - ');
+                        const classInfo = dayData.find(i => i.salon === room && i.hora_inicio === start && i.hora_fin === end);
+                        if (!classInfo) return '<td></td>';
+                        return `<td><div class="class-cell" style="background-color:${getColor(classInfo.profesor)}" data-index="${horariosData.indexOf(classInfo)}">
+                                    <span class="cell-group">${classInfo.grupo}</span>
+                                    <span class="cell-teacher">${getInitials(classInfo.profesor)}</span>
+                                </div></td>`;
+                    }).join('');
+                    return `<tr>${rowHTML}</tr>`;
+                }).join('');
+                table.innerHTML = `<thead>${headHTML}</thead><tbody>${bodyHTML}</tbody>`;
+            };
+
+            table.addEventListener('click', e => {
+                const cell = e.target.closest('.class-cell');
+                if (!cell) return;
+                const info = horariosData[cell.dataset.index];
+                document.getElementById('modal-title').textContent = `${info.salon} | ${info.hora_inicio} - ${info.hora_fin}`;
+                document.getElementById('modal-body').innerHTML = `<p><strong>Grupo:</strong> ${info.grupo}</p><p><strong>Profesor:</strong> ${info.profesor}</p><p><strong>Materia:</strong> ${info.materia}</p>`;
+                modal.style.display = 'block';
+            });
+
+            daySelector.addEventListener('click', e => {
+                if (e.target.tagName === 'BUTTON') {
+                    daySelector.querySelector('.active').classList.remove('active');
+                    e.target.classList.add('active');
+                    render(e.target.dataset.day);
+                }
+            });
+
+            const closeModal = () => modal.style.display = 'none';
+            document.getElementById('close-modal').onclick = closeModal;
+            window.onclick = e => { if (e.target === modal) closeModal(); };
+
+            const today = ['Lunes','Martes','Miércoles','Jueves','Viernes'][new Date().getDay() - 1] || 'Lunes';
+            const todayBtn = daySelector.querySelector(`[data-day="${today}"]`);
+            if (todayBtn) {
+                daySelector.querySelector('.active').classList.remove('active');
+                todayBtn.classList.add('active');
+            }
+            render(today);
+        });
+    </script>
+</body>
+</html>
