@@ -4235,5 +4235,1381 @@
     "hora_fin": "19:40",
     "materia": "Socioemocionales III",
     "profesor": "Deveaux Gutiérrez José JC"
-  }
+  },
+
+
+
+
+
+
+  
+    {
+        "grupo": "5° A Enf",
+        "salon": "A1",
+        "dia": "Lunes",
+        "hora_inicio": "14:30",
+        "hora_fin": "16:10",
+        "materia": "Ingles V",
+        "profesor": "Flores Reyes Miguel Ángel"
+    },
+    {
+        "grupo": "5° A Enf",
+        "salon": "A1",
+        "dia": "Lunes",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:50",
+        "materia": "Temas selectos de matematicas II",
+        "profesor": "Castañeda Mendoza Elizabeth"
+    },
+    {
+        "grupo": "5° A Enf",
+        "salon": "A1",
+        "dia": "Lunes",
+        "hora_inicio": "18:10",
+        "hora_fin": "19:40",
+        "materia": "Seres Humanos: estructura y procesos",
+        "profesor": "Lizaola Díaz María Guadalupe"
+    },
+    {
+        "grupo": "5° A Enf",
+        "salon": "A1",
+        "dia": "Martes",
+        "hora_inicio": "14:30",
+        "hora_fin": "16:10",
+        "materia": "Cuidado de la mujer",
+        "profesor": "Lizaola Díaz María Guadalupe"
+    },
+    {
+        "grupo": "5° A Enf",
+        "salon": "A1",
+        "dia": "Martes",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:50",
+        "materia": "Tutoría V",
+        "profesor": "Beltrán Espinosa Igor Fabián"
+    },
+    {
+        "grupo": "5° A Enf",
+        "salon": "A1",
+        "dia": "Martes",
+        "hora_inicio": "18:10",
+        "hora_fin": "18:55",
+        "materia": "Ingles V",
+        "profesor": "Flores Reyes Miguel Ángel"
+    },
+    {
+        "grupo": "5° A Enf",
+        "salon": "A1",
+        "dia": "Martes",
+        "hora_inicio": "18:55",
+        "hora_fin": "19:40",
+        "materia": "Socioemocionales V",
+        "profesor": "Morales Vigueras Eduardo Adán"
+    },
+    {
+        "grupo": "5° A Enf",
+        "salon": "A1",
+        "dia": "Martes",
+        "hora_inicio": "19:40",
+        "hora_fin": "21:10",
+        "materia": "Cuidado del niño",
+        "profesor": "Díaz Orozco Rita Susana"
+    },
+    {
+        "grupo": "5° A Enf",
+        "salon": "A1",
+        "dia": "Miércoles",
+        "hora_inicio": "14:30",
+        "hora_fin": "15:20",
+        "materia": "Seres Humanos: estructura y procesos",
+        "profesor": "Lizaola Díaz María Guadalupe"
+    },
+    {
+        "grupo": "5° A Enf",
+        "salon": "A1",
+        "dia": "Miércoles",
+        "hora_inicio": "15:20",
+        "hora_fin": "17:00",
+        "materia": "Cuidado del niño",
+        "profesor": "Díaz Orozco Rita Susana"
+    },
+    {
+        "grupo": "5° A Enf",
+        "salon": "A1",
+        "dia": "Miércoles",
+        "hora_inicio": "17:00",
+        "hora_fin": "17:50",
+        "materia": "Ingles V",
+        "profesor": "Flores Reyes Miguel Ángel"
+    },
+    {
+        "grupo": "5° A Enf",
+        "salon": "A1",
+        "dia": "Miércoles",
+        "hora_inicio": "18:10",
+        "hora_fin": "19:40",
+        "materia": "La energía en los procesos de la vida diaria",
+        "profesor": "López Ruiz Jesús Raymundo"
+    },
+    {
+        "grupo": "5° A Enf",
+        "salon": "A1",
+        "dia": "Miércoles",
+        "hora_inicio": "19:40",
+        "hora_fin": "21:10",
+        "materia": "Conciencia Historica II",
+        "profesor": "Pérez Barbarena Héctor"
+    },
+    {
+        "grupo": "5° A Enf",
+        "salon": "A1",
+        "dia": "Jueves",
+        "hora_inicio": "14:30",
+        "hora_fin": "15:20",
+        "materia": "Ingles V",
+        "profesor": "Flores Reyes Miguel Ángel"
+    },
+    {
+        "grupo": "5° A Enf",
+        "salon": "A1",
+        "dia": "Jueves",
+        "hora_inicio": "15:20",
+        "hora_fin": "16:10",
+        "materia": "Temas selectos de matematicas II",
+        "profesor": "Castañeda Mendoza Elizabeth"
+    },
+    {
+        "grupo": "5° A Enf",
+        "salon": "A1",
+        "dia": "Jueves",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:50",
+        "materia": "Cuidado de la mujer",
+        "profesor": "Lizaola Díaz María Guadalupe"
+    },
+    {
+        "grupo": "5° A Enf",
+        "salon": "A1",
+        "dia": "Jueves",
+        "hora_inicio": "18:10",
+        "hora_fin": "19:40",
+        "materia": "Cuidado del niño",
+        "profesor": "Díaz Orozco Rita Susana"
+    },
+    {
+        "grupo": "5° A Enf",
+        "salon": "A1",
+        "dia": "Jueves",
+        "hora_inicio": "19:40",
+        "hora_fin": "20:25",
+        "materia": "Conciencia Historica II",
+        "profesor": "Pérez Barbarena Héctor"
+    },
+    {
+        "grupo": "5° A Enf",
+        "salon": "A1",
+        "dia": "Viernes",
+        "hora_inicio": "14:30",
+        "hora_fin": "16:10",
+        "materia": "La energía en los procesos de la vida diaria",
+        "profesor": "López Ruiz Jesús Raymundo"
+    },
+    {
+        "grupo": "5° A Enf",
+        "salon": "A1",
+        "dia": "Viernes",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:50",
+        "materia": "Cuidado de la mujer",
+        "profesor": "Lizaola Díaz María Guadalupe"
+    },
+    {
+        "grupo": "5° A Enf",
+        "salon": "A1",
+        "dia": "Viernes",
+        "hora_inicio": "18:10",
+        "hora_fin": "19:40",
+        "materia": "Temas selectos de matematicas II",
+        "profesor": "Castañeda Mendoza Elizabeth"
+    },
+    {
+        "grupo": "5° B Enf",
+        "salon": "A2",
+        "dia": "Lunes",
+        "hora_inicio": "14:30",
+        "hora_fin": "16:10",
+        "materia": "Temas selectos de matematicas II",
+        "profesor": "Castañeda Mendoza Elizabeth"
+    },
+    {
+        "grupo": "5° B Enf",
+        "salon": "A2",
+        "dia": "Lunes",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:00",
+        "materia": "Seres Humanos: estructura y procesos",
+        "profesor": "Lizaola Díaz María Guadalupe"
+    },
+    {
+        "grupo": "5° B Enf",
+        "salon": "A2",
+        "dia": "Lunes",
+        "hora_inicio": "17:00",
+        "hora_fin": "17:50",
+        "materia": "Conciencia Historica II",
+        "profesor": "Pérez Barbarena Héctor"
+    },
+    {
+        "grupo": "5° B Enf",
+        "salon": "A2",
+        "dia": "Lunes",
+        "hora_inicio": "18:10",
+        "hora_fin": "19:40",
+        "materia": "Ingles V",
+        "profesor": "Flores Reyes Miguel Ángel"
+    },
+    {
+        "grupo": "5° B Enf",
+        "salon": "A2",
+        "dia": "Martes",
+        "hora_inicio": "14:30",
+        "hora_fin": "16:10",
+        "materia": "Cuidado del niño",
+        "profesor": "González Reyes Manuel"
+    },
+    {
+        "grupo": "5° B Enf",
+        "salon": "A2",
+        "dia": "Martes",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:00",
+        "materia": "Temas selectos de matematicas II",
+        "profesor": "Castañeda Mendoza Elizabeth"
+    },
+    {
+        "grupo": "5° B Enf",
+        "salon": "A2",
+        "dia": "Martes",
+        "hora_inicio": "17:00",
+        "hora_fin": "17:50",
+        "materia": "Socioemocionales V",
+        "profesor": "Morales Vigueras Eduardo Adán"
+    },
+    {
+        "grupo": "5° B Enf",
+        "salon": "A2",
+        "dia": "Martes",
+        "hora_inicio": "18:10",
+        "hora_fin": "19:40",
+        "materia": "Cuidado de la mujer",
+        "profesor": "Lizaola Díaz María Guadalupe"
+    },
+    {
+        "grupo": "5° B Enf",
+        "salon": "A2",
+        "dia": "Miércoles",
+        "hora_inicio": "14:30",
+        "hora_fin": "16:10",
+        "materia": "Cuidado del niño",
+        "profesor": "González Reyes Manuel"
+    },
+    {
+        "grupo": "5° B Enf",
+        "salon": "A2",
+        "dia": "Miércoles",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:50",
+        "materia": "Conciencia Historica II",
+        "profesor": "Pérez Barbarena Héctor"
+    },
+    {
+        "grupo": "5° B Enf",
+        "salon": "A2",
+        "dia": "Miércoles",
+        "hora_inicio": "18:10",
+        "hora_fin": "19:40",
+        "materia": "Cuidado de la mujer",
+        "profesor": "Lizaola Díaz María Guadalupe"
+    },
+    {
+        "grupo": "5° B Enf",
+        "salon": "A2",
+        "dia": "Miércoles",
+        "hora_inicio": "19:40",
+        "hora_fin": "21:10",
+        "materia": "La energía en los procesos de la vida diaria",
+        "profesor": "Marmolejo Cortés Francisca"
+    },
+    {
+        "grupo": "5° B Enf",
+        "salon": "A2",
+        "dia": "Jueves",
+        "hora_inicio": "14:30",
+        "hora_fin": "16:10",
+        "materia": "Seres Humanos: estructura y procesos",
+        "profesor": "Lizaola Díaz María Guadalupe"
+    },
+    {
+        "grupo": "5° B Enf",
+        "salon": "A2",
+        "dia": "Jueves",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:50",
+        "materia": "Cuidado del niño",
+        "profesor": "González Reyes Manuel"
+    },
+    {
+        "grupo": "5° B Enf",
+        "salon": "A2",
+        "dia": "Jueves",
+        "hora_inicio": "18:10",
+        "hora_fin": "19:40",
+        "materia": "Temas selectos de matematicas II",
+        "profesor": "Castañeda Mendoza Elizabeth"
+    },
+    {
+        "grupo": "5° B Enf",
+        "salon": "A2",
+        "dia": "Jueves",
+        "hora_inicio": "19:40",
+        "hora_fin": "21:10",
+        "materia": "Ingles V",
+        "profesor": "Flores Reyes Miguel Ángel"
+    },
+    {
+        "grupo": "5° B Enf",
+        "salon": "A2",
+        "dia": "Viernes",
+        "hora_inicio": "14:30",
+        "hora_fin": "16:10",
+        "materia": "La energía en los procesos de la vida diaria",
+        "profesor": "Marmolejo Cortés Francisca"
+    },
+    {
+        "grupo": "5° B Enf",
+        "salon": "A2",
+        "dia": "Viernes",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:50",
+        "materia": "Tutoría V",
+        "profesor": "Hernández López Eva"
+    },
+    {
+        "grupo": "5° B Enf",
+        "salon": "A2",
+        "dia": "Viernes",
+        "hora_inicio": "18:10",
+        "hora_fin": "19:40",
+        "materia": "Cuidado de la mujer",
+        "profesor": "Lizaola Díaz María Guadalupe"
+    },
+    {
+        "grupo": "5° B Enf",
+        "salon": "A2",
+        "dia": "Viernes",
+        "hora_inicio": "19:40",
+        "hora_fin": "20:25",
+        "materia": "Ingles V",
+        "profesor": "Flores Reyes Miguel Ángel"
+    },
+    {
+        "grupo": "5° C Enf",
+        "salon": "A3",
+        "dia": "Lunes",
+        "hora_inicio": "14:30",
+        "hora_fin": "16:10",
+        "materia": "La energía en los procesos de la vida diaria",
+        "profesor": "Marmolejo Cortés Francisca"
+    },
+    {
+        "grupo": "5° C Enf",
+        "salon": "A3",
+        "dia": "Lunes",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:50",
+        "materia": "Ingles V",
+        "profesor": "Flores Reyes Miguel Ángel"
+    },
+    {
+        "grupo": "5° C Enf",
+        "salon": "A3",
+        "dia": "Lunes",
+        "hora_inicio": "18:10",
+        "hora_fin": "19:40",
+        "materia": "Temas selectos de matematicas II",
+        "profesor": "Castañeda Mendoza Elizabeth"
+    },
+    {
+        "grupo": "5° C Enf",
+        "salon": "A3",
+        "dia": "Lunes",
+        "hora_inicio": "19:40",
+        "hora_fin": "21:10",
+        "materia": "Cuidado de la mujer",
+        "profesor": "Lizaola Díaz María Guadalupe"
+    },
+    {
+        "grupo": "5° C Enf",
+        "salon": "A3",
+        "dia": "Martes",
+        "hora_inicio": "15:20",
+        "hora_fin": "16:10",
+        "materia": "Temas selectos de matematicas II",
+        "profesor": "Castañeda Mendoza Elizabeth"
+    },
+    {
+        "grupo": "5° C Enf",
+        "salon": "A3",
+        "dia": "Martes",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:00",
+        "materia": "Conciencia Historica II",
+        "profesor": "Pérez Barbarena Héctor"
+    },
+    {
+        "grupo": "5° C Enf",
+        "salon": "A3",
+        "dia": "Martes",
+        "hora_inicio": "17:00",
+        "hora_fin": "17:50",
+        "materia": "Cuidado del niño",
+        "profesor": "Díaz Orozco Rita Susana"
+    },
+    {
+        "grupo": "5° C Enf",
+        "salon": "A3",
+        "dia": "Martes",
+        "hora_inicio": "18:10",
+        "hora_fin": "18:55",
+        "materia": "Cuidado del niño",
+        "profesor": "Díaz Orozco Rita Susana"
+    },
+    {
+        "grupo": "5° C Enf",
+        "salon": "A3",
+        "dia": "Martes",
+        "hora_inicio": "18:55",
+        "hora_fin": "19:40",
+        "materia": "Tutoría V",
+        "profesor": "Hernández López Eva"
+    },
+    {
+        "grupo": "5° C Enf",
+        "salon": "A3",
+        "dia": "Martes",
+        "hora_inicio": "19:40",
+        "hora_fin": "21:10",
+        "materia": "Cuidado de la mujer",
+        "profesor": "Lizaola Díaz María Guadalupe"
+    },
+    {
+        "grupo": "5° C Enf",
+        "salon": "A3",
+        "dia": "Miércoles",
+        "hora_inicio": "14:30",
+        "hora_fin": "15:20",
+        "materia": "Seres Humanos: estructura y procesos",
+        "profesor": "Cortés Sánchez Claudia Flor"
+    },
+    {
+        "grupo": "5° C Enf",
+        "salon": "A3",
+        "dia": "Miércoles",
+        "hora_inicio": "15:20",
+        "hora_fin": "16:10",
+        "materia": "Socioemocionales V",
+        "profesor": "Morales Vigueras Eduardo Adán"
+    },
+    {
+        "grupo": "5° C Enf",
+        "salon": "A3",
+        "dia": "Miércoles",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:50",
+        "materia": "Seres Humanos: estructura y procesos",
+        "profesor": "Cortés Sánchez Claudia Flor"
+    },
+    {
+        "grupo": "5° C Enf",
+        "salon": "A3",
+        "dia": "Miércoles",
+        "hora_inicio": "18:10",
+        "hora_fin": "19:40",
+        "materia": "Cuidado del niño",
+        "profesor": "Díaz Orozco Rita Susana"
+    },
+    {
+        "grupo": "5° C Enf",
+        "salon": "A3",
+        "dia": "Miércoles",
+        "hora_inicio": "19:40",
+        "hora_fin": "21:10",
+        "materia": "Temas selectos de matematicas II",
+        "profesor": "Castañeda Mendoza Elizabeth"
+    },
+    {
+        "grupo": "5° C Enf",
+        "salon": "A3",
+        "dia": "Jueves",
+        "hora_inicio": "14:30",
+        "hora_fin": "15:20",
+        "materia": "Seres Humanos: estructura y procesos",
+        "profesor": "Cortés Sánchez Claudia Flor"
+    },
+    {
+        "grupo": "5° C Enf",
+        "salon": "A3",
+        "dia": "Jueves",
+        "hora_inicio": "15:20",
+        "hora_fin": "16:10",
+        "materia": "Ingles V",
+        "profesor": "Flores Reyes Miguel Ángel"
+    },
+    {
+        "grupo": "5° C Enf",
+        "salon": "A3",
+        "dia": "Jueves",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:50",
+        "materia": "Cuidado del niño",
+        "profesor": "Díaz Orozco Rita Susana"
+    },
+    {
+        "grupo": "5° C Enf",
+        "salon": "A3",
+        "dia": "Jueves",
+        "hora_inicio": "18:10",
+        "hora_fin": "19:40",
+        "materia": "Cuidado de la mujer",
+        "profesor": "Lizaola Díaz María Guadalupe"
+    },
+    {
+        "grupo": "5° C Enf",
+        "salon": "A3",
+        "dia": "Jueves",
+        "hora_inicio": "19:40",
+        "hora_fin": "21:10",
+        "materia": "La energía en los procesos de la vida diaria",
+        "profesor": "Marmolejo Cortés Francisca"
+    },
+    {
+        "grupo": "5° C Enf",
+        "salon": "A3",
+        "dia": "Viernes",
+        "hora_inicio": "14:30",
+        "hora_fin": "16:10",
+        "materia": "Ingles V",
+        "profesor": "Flores Reyes Miguel Ángel"
+    },
+    {
+        "grupo": "5° C Enf",
+        "salon": "A3",
+        "dia": "Viernes",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:50",
+        "materia": "Conciencia Historica II",
+        "profesor": "Pérez Barbarena Héctor"
+    },
+    {
+        "grupo": "5° C Enf",
+        "salon": "A3",
+        "dia": "Viernes",
+        "hora_inicio": "18:10",
+        "hora_fin": "18:55",
+        "materia": "Tutoría V",
+        "profesor": "Hernández López Eva"
+    },
+    {
+        "grupo": "5° C Enf",
+        "salon": "A3",
+        "dia": "Viernes",
+        "hora_inicio": "18:55",
+        "hora_fin": "19:40",
+        "materia": "Cuidado de la mujer",
+        "profesor": "Lizaola Díaz María Guadalupe"
+    },
+    {
+        "grupo": "5° D Enf",
+        "salon": "A4",
+        "dia": "Lunes",
+        "hora_inicio": "14:30",
+        "hora_fin": "16:10",
+        "materia": "Cuidado de la mujer",
+        "profesor": "Lizaola Díaz María Guadalupe"
+    },
+    {
+        "grupo": "5° D Enf",
+        "salon": "A4",
+        "dia": "Lunes",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:00",
+        "materia": "Tutoría V",
+        "profesor": "Cortés Sánchez Claudia Flor"
+    },
+    {
+        "grupo": "5° D Enf",
+        "salon": "A4",
+        "dia": "Lunes",
+        "hora_inicio": "17:00",
+        "hora_fin": "17:50",
+        "materia": "Temas selectos de matematicas II",
+        "profesor": "Marmolejo Cortés Francisca"
+    },
+    {
+        "grupo": "5° D Enf",
+        "salon": "A4",
+        "dia": "Lunes",
+        "hora_inicio": "18:10",
+        "hora_fin": "19:40",
+        "materia": "Conciencia Historica II",
+        "profesor": "Pérez Barbarena Héctor"
+    },
+    {
+        "grupo": "5° D Enf",
+        "salon": "A4",
+        "dia": "Lunes",
+        "hora_inicio": "19:40",
+        "hora_fin": "21:10",
+        "materia": "Ingles V",
+        "profesor": "Flores Reyes Miguel Ángel"
+    },
+    {
+        "grupo": "5° D Enf",
+        "salon": "A4",
+        "dia": "Martes",
+        "hora_inicio": "14:30",
+        "hora_fin": "16:10",
+        "materia": "Cuidado del niño",
+        "profesor": "Díaz Orozco Rita Susana"
+    },
+    {
+        "grupo": "5° D Enf",
+        "salon": "A4",
+        "dia": "Martes",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:50",
+        "materia": "La energía en los procesos de la vida diaria",
+        "profesor": "Marmolejo Cortés Francisca"
+    },
+    {
+        "grupo": "5° D Enf",
+        "salon": "A4",
+        "dia": "Martes",
+        "hora_inicio": "18:10",
+        "hora_fin": "18:55",
+        "materia": "Tutoría V",
+        "profesor": "Cortés Sánchez Claudia Flor"
+    },
+    {
+        "grupo": "5° D Enf",
+        "salon": "A4",
+        "dia": "Martes",
+        "hora_inicio": "18:55",
+        "hora_fin": "19:40",
+        "materia": "Ingles V",
+        "profesor": "Flores Reyes Miguel Ángel"
+    },
+    {
+        "grupo": "5° D Enf",
+        "salon": "A4",
+        "dia": "Martes",
+        "hora_inicio": "19:40",
+        "hora_fin": "20:25",
+        "materia": "Conciencia Historica II",
+        "profesor": "Pérez Barbarena Héctor"
+    },
+    {
+        "grupo": "5° D Enf",
+        "salon": "A4",
+        "dia": "Miércoles",
+        "hora_inicio": "14:30",
+        "hora_fin": "16:10",
+        "materia": "Seres Humanos: estructura y procesos",
+        "profesor": "Cortés Sánchez Claudia Flor"
+    },
+    {
+        "grupo": "5° D Enf",
+        "salon": "A4",
+        "dia": "Miércoles",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:50",
+        "materia": "Cuidado de la mujer",
+        "profesor": "Lizaola Díaz María Guadalupe"
+    },
+    {
+        "grupo": "5° D Enf",
+        "salon": "A4",
+        "dia": "Miércoles",
+        "hora_inicio": "18:10",
+        "hora_fin": "19:40",
+        "materia": "Temas selectos de matematicas II",
+        "profesor": "Marmolejo Cortés Francisca"
+    },
+    {
+        "grupo": "5° D Enf",
+        "salon": "A4",
+        "dia": "Miércoles",
+        "hora_inicio": "19:40",
+        "hora_fin": "21:10",
+        "materia": "Cuidado del niño",
+        "profesor": "Díaz Orozco Rita Susana"
+    },
+    {
+        "grupo": "5° D Enf",
+        "salon": "A4",
+        "dia": "Jueves",
+        "hora_inicio": "14:30",
+        "hora_fin": "16:10",
+        "materia": "Cuidado del niño",
+        "profesor": "Díaz Orozco Rita Susana"
+    },
+    {
+        "grupo": "5° D Enf",
+        "salon": "A4",
+        "dia": "Jueves",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:00",
+        "materia": "Seres Humanos: estructura y procesos",
+        "profesor": "Cortés Sánchez Claudia Flor"
+    },
+    {
+        "grupo": "5° D Enf",
+        "salon": "A4",
+        "dia": "Jueves",
+        "hora_inicio": "17:00",
+        "hora_fin": "17:50",
+        "materia": "Temas selectos de matematicas II",
+        "profesor": "Marmolejo Cortés Francisca"
+    },
+    {
+        "grupo": "5° D Enf",
+        "salon": "A4",
+        "dia": "Jueves",
+        "hora_inicio": "18:55",
+        "hora_fin": "19:40",
+        "materia": "Socioemocionales V",
+        "profesor": "Morales Vigueras Eduardo Adán"
+    },
+    {
+        "grupo": "5° D Enf",
+        "salon": "A4",
+        "dia": "Viernes",
+        "hora_inicio": "14:30",
+        "hora_fin": "16:10",
+        "materia": "Cuidado de la mujer",
+        "profesor": "Lizaola Díaz María Guadalupe"
+    },
+    {
+        "grupo": "5° D Enf",
+        "salon": "A4",
+        "dia": "Viernes",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:50",
+        "materia": "Ingles V",
+        "profesor": "Flores Reyes Miguel Ángel"
+    },
+    {
+        "grupo": "5° D Enf",
+        "salon": "A4",
+        "dia": "Viernes",
+        "hora_inicio": "18:10",
+        "hora_fin": "19:40",
+        "materia": "La energía en los procesos de la vida diaria",
+        "profesor": "Marmolejo Cortés Francisca"
+    },
+    {
+        "grupo": "5° A Rad",
+        "salon": "A5",
+        "dia": "Lunes",
+        "hora_inicio": "15:20",
+        "hora_fin": "16:10",
+        "materia": "Conciencia Historica II",
+        "profesor": "Pérez Barbarena Héctor"
+    },
+    {
+        "grupo": "5° A Rad",
+        "salon": "A5",
+        "dia": "Lunes",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:50",
+        "materia": "Anatomía Imagenológica",
+        "profesor": "Vela Dos Santos Ruve"
+    },
+    {
+        "grupo": "5° A Rad",
+        "salon": "A5",
+        "dia": "Lunes",
+        "hora_inicio": "18:10",
+        "hora_fin": "18:55",
+        "materia": "Seres Humanos: estructura y procesos",
+        "profesor": "Cortés Sánchez Claudia Flor"
+    },
+    {
+        "grupo": "5° A Rad",
+        "salon": "A5",
+        "dia": "Lunes",
+        "hora_inicio": "18:55",
+        "hora_fin": "19:40",
+        "materia": "Tutoría V",
+        "profesor": "Guerrero Vera Carlos"
+    },
+    {
+        "grupo": "5° A Rad",
+        "salon": "A5",
+        "dia": "Lunes",
+        "hora_inicio": "19:40",
+        "hora_fin": "21:10",
+        "materia": "Temas selectos de matematicas II",
+        "profesor": "Marmolejo Cortés Francisca"
+    },
+    {
+        "grupo": "5° A Rad",
+        "salon": "A5",
+        "dia": "Martes",
+        "hora_inicio": "14:30",
+        "hora_fin": "16:10",
+        "materia": "Temas selectos de matematicas II",
+        "profesor": "Marmolejo Cortés Francisca"
+    },
+    {
+        "grupo": "5° A Rad",
+        "salon": "A5",
+        "dia": "Martes",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:00",
+        "materia": "Seres Humanos: estructura y procesos",
+        "profesor": "Cortés Sánchez Claudia Flor"
+    },
+    {
+        "grupo": "5° A Rad",
+        "salon": "A5",
+        "dia": "Martes",
+        "hora_inicio": "17:00",
+        "hora_fin": "17:50",
+        "materia": "Ingles V",
+        "profesor": "Flores Reyes Miguel Ángel"
+    },
+    {
+        "grupo": "5° A Rad",
+        "salon": "A5",
+        "dia": "Martes",
+        "hora_inicio": "18:10",
+        "hora_fin": "19:40",
+        "materia": "Conciencia Historica II",
+        "profesor": "Pérez Barbarena Héctor"
+    },
+    {
+        "grupo": "5° A Rad",
+        "salon": "A5",
+        "dia": "Martes",
+        "hora_inicio": "19:40",
+        "hora_fin": "21:10",
+        "materia": "USG y Resonancia magnetica",
+        "profesor": "Flores Gonzalez Jose Gabriel"
+    },
+    {
+        "grupo": "5° A Rad",
+        "salon": "A5",
+        "dia": "Miércoles",
+        "hora_inicio": "14:30",
+        "hora_fin": "16:10",
+        "materia": "Anatomía Imagenológica",
+        "profesor": "Vela Dos Santos Ruve"
+    },
+    {
+        "grupo": "5° A Rad",
+        "salon": "A5",
+        "dia": "Miércoles",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:50",
+        "materia": "La energía en los procesos de la vida diaria",
+        "profesor": "López Ruiz Jesús Raymundo"
+    },
+    {
+        "grupo": "5° A Rad",
+        "salon": "A5",
+        "dia": "Miércoles",
+        "hora_inicio": "18:10",
+        "hora_fin": "18:55",
+        "materia": "Socioemocionales V",
+        "profesor": "Morales Vigueras Eduardo Adán"
+    },
+    {
+        "grupo": "5° A Rad",
+        "salon": "A5",
+        "dia": "Miércoles",
+        "hora_inicio": "18:55",
+        "hora_fin": "19:40",
+        "materia": "Ingles V",
+        "profesor": "Flores Reyes Miguel Ángel"
+    },
+    {
+        "grupo": "5° A Rad",
+        "salon": "A5",
+        "dia": "Miércoles",
+        "hora_inicio": "19:40",
+        "hora_fin": "21:10",
+        "materia": "USG y Resonancia magnetica",
+        "profesor": "Flores Gonzalez Jose Gabriel"
+    },
+    {
+        "grupo": "5° A Rad",
+        "salon": "A5",
+        "dia": "Jueves",
+        "hora_inicio": "14:30",
+        "hora_fin": "15:20",
+        "materia": "Tutoría V",
+        "profesor": "Guerrero Vera Carlos"
+    },
+    {
+        "grupo": "5° A Rad",
+        "salon": "A5",
+        "dia": "Jueves",
+        "hora_inicio": "15:20",
+        "hora_fin": "16:10",
+        "materia": "Seres Humanos: estructura y procesos",
+        "profesor": "Cortés Sánchez Claudia Flor"
+    },
+    {
+        "grupo": "5° A Rad",
+        "salon": "A5",
+        "dia": "Jueves",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:00",
+        "materia": "Ingles V",
+        "profesor": "Flores Reyes Miguel Ángel"
+    },
+    {
+        "grupo": "5° A Rad",
+        "salon": "A5",
+        "dia": "Jueves",
+        "hora_inicio": "17:00",
+        "hora_fin": "17:50",
+        "materia": "USG y Resonancia magnetica",
+        "profesor": "Flores Gonzalez Jose Gabriel"
+    },
+    {
+        "grupo": "5° A Rad",
+        "salon": "A5",
+        "dia": "Jueves",
+        "hora_inicio": "18:55",
+        "hora_fin": "19:40",
+        "materia": "Temas selectos de matematicas II",
+        "profesor": "Marmolejo Cortés Francisca"
+    },
+    {
+        "grupo": "5° A Rad",
+        "salon": "A5",
+        "dia": "Viernes",
+        "hora_inicio": "14:30",
+        "hora_fin": "16:10",
+        "materia": "Anatomía Imagenológica",
+        "profesor": "Vela Dos Santos Ruve"
+    },
+    {
+        "grupo": "5° A Rad",
+        "salon": "A5",
+        "dia": "Viernes",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:50",
+        "materia": "La energía en los procesos de la vida diaria",
+        "profesor": "López Ruiz Jesús Raymundo"
+    },
+    {
+        "grupo": "5° A Rad",
+        "salon": "A5",
+        "dia": "Viernes",
+        "hora_inicio": "18:10",
+        "hora_fin": "19:40",
+        "materia": "Ingles V",
+        "profesor": "Flores Reyes Miguel Ángel"
+    },
+    {
+        "grupo": "5° B Rad",
+        "salon": "A 14",
+        "dia": "Lunes",
+        "hora_inicio": "14:30",
+        "hora_fin": "16:10",
+        "materia": "Seres Humanos: estructura y procesos",
+        "profesor": "Cortés Sánchez Claudia Flor"
+    },
+    {
+        "grupo": "5° B Rad",
+        "salon": "A 14",
+        "dia": "Lunes",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:00",
+        "materia": "Conciencia Historica II",
+        "profesor": "Pérez Barbarena Héctor"
+    },
+    {
+        "grupo": "5° B Rad",
+        "salon": "A 14",
+        "dia": "Lunes",
+        "hora_inicio": "17:00",
+        "hora_fin": "17:50",
+        "materia": "Socioemocionales V",
+        "profesor": "Morales Vigueras Eduardo Adán"
+    },
+    {
+        "grupo": "5° B Rad",
+        "salon": "A 14",
+        "dia": "Lunes",
+        "hora_inicio": "18:10",
+        "hora_fin": "18:55",
+        "materia": "Temas selectos de matematicas II",
+        "profesor": "Marmolejo Cortés Francisca"
+    },
+    {
+        "grupo": "5° B Rad",
+        "salon": "A 14",
+        "dia": "Lunes",
+        "hora_inicio": "18:55",
+        "hora_fin": "19:40",
+        "materia": "Anatomía Imagenológica",
+        "profesor": "Flores Gonzalez Jose Gabriel"
+    },
+    {
+        "grupo": "5° B Rad",
+        "salon": "A 14",
+        "dia": "Lunes",
+        "hora_inicio": "19:40",
+        "hora_fin": "21:10",
+        "materia": "USG y Resonancia magnetica",
+        "profesor": "Flores Gonzalez Jose Gabriel"
+    },
+    {
+        "grupo": "5° B Rad",
+        "salon": "A 14",
+        "dia": "Martes",
+        "hora_inicio": "14:30",
+        "hora_fin": "16:10",
+        "materia": "Anatomía Imagenológica",
+        "profesor": "Flores Gonzalez Jose Gabriel"
+    },
+    {
+        "grupo": "5° B Rad",
+        "salon": "A 14",
+        "dia": "Martes",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:50",
+        "materia": "USG y Resonancia magnetica",
+        "profesor": "Flores Gonzalez Jose Gabriel"
+    },
+    {
+        "grupo": "5° B Rad",
+        "salon": "A 14",
+        "dia": "Martes",
+        "hora_inicio": "18:55",
+        "hora_fin": "19:40",
+        "materia": "Seres Humanos: estructura y procesos",
+        "profesor": "Cortés Sánchez Claudia Flor"
+    },
+    {
+        "grupo": "5° B Rad",
+        "salon": "A 14",
+        "dia": "Martes",
+        "hora_inicio": "19:40",
+        "hora_fin": "21:10",
+        "materia": "Ingles V",
+        "profesor": "Flores Reyes Miguel Ángel"
+    },
+    {
+        "grupo": "5° B Rad",
+        "salon": "A 14",
+        "dia": "Miércoles",
+        "hora_inicio": "14:30",
+        "hora_fin": "17:00",
+        "materia": "Anatomía Imagenológica",
+        "profesor": "Flores Gonzalez Jose Gabriel"
+    },
+    {
+        "grupo": "5° B Rad",
+        "salon": "A 14",
+        "dia": "Miércoles",
+        "hora_inicio": "17:00",
+        "hora_fin": "17:50",
+        "materia": "Temas selectos de matematicas II",
+        "profesor": "Marmolejo Cortés Francisca"
+    },
+    {
+        "grupo": "5° B Rad",
+        "salon": "A 14",
+        "dia": "Miércoles",
+        "hora_inicio": "18:10",
+        "hora_fin": "19:40",
+        "materia": "Tutoría V",
+        "profesor": "Rodríguez Butanda María de la Cruz"
+    },
+    {
+        "grupo": "5° B Rad",
+        "salon": "A 14",
+        "dia": "Miércoles",
+        "hora_inicio": "19:40",
+        "hora_fin": "21:10",
+        "materia": "Ingles V",
+        "profesor": "Flores Reyes Miguel Ángel"
+    },
+    {
+        "grupo": "5° B Rad",
+        "salon": "A 14",
+        "dia": "Jueves",
+        "hora_inicio": "15:20",
+        "hora_fin": "17:00",
+        "materia": "Temas selectos de matematicas II",
+        "profesor": "Marmolejo Cortés Francisca"
+    },
+    {
+        "grupo": "5° B Rad",
+        "salon": "A 14",
+        "dia": "Jueves",
+        "hora_inicio": "17:00",
+        "hora_fin": "17:50",
+        "materia": "Ingles V",
+        "profesor": "Flores Reyes Miguel Ángel"
+    },
+    {
+        "grupo": "5° B Rad",
+        "salon": "A 14",
+        "dia": "Jueves",
+        "hora_inicio": "18:10",
+        "hora_fin": "19:40",
+        "materia": "La energía en los procesos de la vida diaria",
+        "profesor": "López Ruiz Jesús Raymundo"
+    },
+    {
+        "grupo": "5° B Rad",
+        "salon": "A 14",
+        "dia": "Viernes",
+        "hora_inicio": "14:30",
+        "hora_fin": "16:10",
+        "materia": "Conciencia Historica II",
+        "profesor": "Pérez Barbarena Héctor"
+    },
+    {
+        "grupo": "5° B Rad",
+        "salon": "A 14",
+        "dia": "Viernes",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:50",
+        "materia": "USG y Resonancia magnetica",
+        "profesor": "Flores Gonzalez Jose Gabriel"
+    },
+    {
+        "grupo": "5° B Rad",
+        "salon": "A 14",
+        "dia": "Viernes",
+        "hora_inicio": "18:10",
+        "hora_fin": "19:40",
+        "materia": "La energía en los procesos de la vida diaria",
+        "profesor": "López Ruiz Jesús Raymundo"
+    },
+    {
+        "grupo": "5° C Rad",
+        "salon": "A 15",
+        "dia": "Lunes",
+        "hora_inicio": "17:00",
+        "hora_fin": "17:50",
+        "materia": "USG y Resonancia magnetica",
+        "profesor": "Flores Gonzalez Jose Gabriel"
+    },
+    {
+        "grupo": "5° C Rad",
+        "salon": "A 15",
+        "dia": "Lunes",
+        "hora_inicio": "18:10",
+        "hora_fin": "18:55",
+        "materia": "USG y Resonancia magnetica",
+        "profesor": "Flores Gonzalez Jose Gabriel"
+    },
+    {
+        "grupo": "5° C Rad",
+        "salon": "A 15",
+        "dia": "Lunes",
+        "hora_inicio": "18:55",
+        "hora_fin": "19:40",
+        "materia": "Temas selectos de matematicas II",
+        "profesor": "Marmolejo Cortés Francisca"
+    },
+    {
+        "grupo": "5° C Rad",
+        "salon": "A 15",
+        "dia": "Lunes",
+        "hora_inicio": "19:40",
+        "hora_fin": "21:10",
+        "materia": "Conciencia Historica II",
+        "profesor": "Pérez Barbarena Héctor"
+    },
+    {
+        "grupo": "5° C Rad",
+        "salon": "A 15",
+        "dia": "Martes",
+        "hora_inicio": "14:30",
+        "hora_fin": "16:10",
+        "materia": "Seres Humanos: estructura y procesos",
+        "profesor": "Cortés Sánchez Claudia Flor"
+    },
+    {
+        "grupo": "5° C Rad",
+        "salon": "A 15",
+        "dia": "Martes",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:00",
+        "materia": "Ingles V",
+        "profesor": "Flores Reyes Miguel Ángel"
+    },
+    {
+        "grupo": "5° C Rad",
+        "salon": "A 15",
+        "dia": "Martes",
+        "hora_inicio": "17:00",
+        "hora_fin": "17:50",
+        "materia": "Conciencia Historica II",
+        "profesor": "Pérez Barbarena Héctor"
+    },
+    {
+        "grupo": "5° C Rad",
+        "salon": "A 15",
+        "dia": "Martes",
+        "hora_inicio": "18:55",
+        "hora_fin": "19:40",
+        "materia": "USG y Resonancia magnetica",
+        "profesor": "Flores Gonzalez Jose Gabriel"
+    },
+    {
+        "grupo": "5° C Rad",
+        "salon": "A 15",
+        "dia": "Martes",
+        "hora_inicio": "19:40",
+        "hora_fin": "21:10",
+        "materia": "Temas selectos de matematicas II",
+        "profesor": "Marmolejo Cortés Francisca"
+    },
+    {
+        "grupo": "5° C Rad",
+        "salon": "A 15",
+        "dia": "Miércoles",
+        "hora_inicio": "14:30",
+        "hora_fin": "16:10",
+        "materia": "Ingles V",
+        "profesor": "Flores Reyes Miguel Ángel"
+    },
+    {
+        "grupo": "5° C Rad",
+        "salon": "A 15",
+        "dia": "Miércoles",
+        "hora_inicio": "17:00",
+        "hora_fin": "17:50",
+        "materia": "USG y Resonancia magnetica",
+        "profesor": "Flores Gonzalez Jose Gabriel"
+    },
+    {
+        "grupo": "5° C Rad",
+        "salon": "A 15",
+        "dia": "Miércoles",
+        "hora_inicio": "18:10",
+        "hora_fin": "18:55",
+        "materia": "USG y Resonancia magnetica",
+        "profesor": "Flores Gonzalez Jose Gabriel"
+    },
+    {
+        "grupo": "5° C Rad",
+        "salon": "A 15",
+        "dia": "Miércoles",
+        "hora_inicio": "18:55",
+        "hora_fin": "19:40",
+        "materia": "Tutoría V",
+        "profesor": "Beltrán Espinosa Igor Fabián"
+    },
+    {
+        "grupo": "5° C Rad",
+        "salon": "A 15",
+        "dia": "Miércoles",
+        "hora_inicio": "19:40",
+        "hora_fin": "21:10",
+        "materia": "La energía en los procesos de la vida diaria",
+        "profesor": "López Ruiz Jesús Raymundo"
+    },
+    {
+        "grupo": "5° C Rad",
+        "salon": "A 15",
+        "dia": "Jueves",
+        "hora_inicio": "14:30",
+        "hora_fin": "16:10",
+        "materia": "Anatomía Imagenológica",
+        "profesor": "Flores Gonzalez Jose Gabriel"
+    },
+    {
+        "grupo": "5° C Rad",
+        "salon": "A 15",
+        "dia": "Jueves",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:50",
+        "materia": "Seres Humanos: estructura y procesos",
+        "profesor": "Cortés Sánchez Claudia Flor"
+    },
+    {
+        "grupo": "5° C Rad",
+        "salon": "A 15",
+        "dia": "Jueves",
+        "hora_inicio": "18:10",
+        "hora_fin": "18:55",
+        "materia": "Socioemocionales V",
+        "profesor": "Morales Vigueras Eduardo Adán"
+    },
+    {
+        "grupo": "5° C Rad",
+        "salon": "A 15",
+        "dia": "Jueves",
+        "hora_inicio": "18:55",
+        "hora_fin": "19:40",
+        "materia": "Ingles V",
+        "profesor": "Flores Reyes Miguel Ángel"
+    },
+    {
+        "grupo": "5° C Rad",
+        "salon": "A 15",
+        "dia": "Jueves",
+        "hora_inicio": "19:40",
+        "hora_fin": "20:25",
+        "materia": "La energía en los procesos de la vida diaria",
+        "profesor": "López Ruiz Jesús Raymundo"
+    },
+    {
+        "grupo": "5° C Rad",
+        "salon": "A 15",
+        "dia": "Viernes",
+        "hora_inicio": "16:10",
+        "hora_fin": "17:50",
+        "materia": "Temas selectos de matematicas II",
+        "profesor": "Marmolejo Cortés Francisca"
+    },
+    {
+        "grupo": "5° C Rad",
+        "salon": "A 15",
+        "dia": "Viernes",
+        "hora_inicio": "18:10",
+        "hora_fin": "19:40",
+        "materia": "Anatomía Imagenológica",
+        "profesor": "Flores Gonzalez Jose Gabriel"
+    },
+    {
+        "grupo": "5° C Rad",
+        "salon": "A 15",
+        "dia": "Viernes",
+        "hora_inicio": "19:40",
+        "hora_fin": "20:25",
+        "materia": "Anatomía Imagenológica",
+        "profesor": "Flores Gonzalez Jose Gabriel"
+    },
+    {
+        "grupo": "5° C Rad",
+        "salon": "A 15",
+        "dia": "Viernes",
+        "hora_inicio": "20:25",
+        "hora_fin": "21:10",
+        "materia": "Tutoría V",
+        "profesor": "Beltrán Espinosa Igor Fabián"
+    }
+
 ]
