@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Importador de CSV de Horarios</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            margin: 0;
+            background: #f5f7fb;
+            color: #2c3e50
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 16px
+        }
+
+        header {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 14px 18px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px #0000001a;
+            margin-bottom: 14px
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.35rem
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px #00000014;
+            padding: 14px
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 12px
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: #f8fafc;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px
+        }
+
+        .field label {
+            font-weight: 600;
+            font-size: .95rem
+        }
+
+        input[type="file"] {
+            background: #fff;
+            padding: 8px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px
+        }
+
+        button {
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 1px solid #dee2e6;
+            background: #fff;
+            cursor: pointer;
+            transition: all .15s ease
+        }
+
+        button.primary {
+            background: #3498db;
+            color: #fff;
+            border-color: #3498db
+        }
+
+        button:disabled {
+            opacity: .6;
+            cursor: not-allowed
+        }
+
+        button:hover {
+            transform: translateY(-1px)
+        }
+
+        .status {
+            margin-top: 12px;
+            display: grid;
+            gap: 8px
+        }
+
+        .status-item {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 10px
+        }
+
+        .ok {
+            color: #27ae60
+        }
+
+        .warn {
+            color: #e67e22
+        }
+
+        .err {
+            color: #c0392b
+        }
+
+        details summary {
+            cursor: pointer
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 180px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 12px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            background: #fff
+        }
+
+        .preview {
+            margin-top: 12px
+        }
+
+        .footer-note {
+            margin-top: 8px;
+            color: #6c757d;
+            font-size: .92rem
+        }
+    </style>
+    <meta name="color-scheme" content="light dark">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Importador de CSV de Horarios (5 archivos: L-V)</h1>
+        </header>
+
+        <div class="card">
+            <p><strong>Formato esperado de columnas</strong>:
+                <code>grupo,salon,hora_inicio,hora_fin,materia,profesor</code>. El día se infiere por archivo.</p>
+            <div class="grid">
+                <div class="field"><label for="file-lunes">Lunes</label><input id="file-lunes" type="file"
+                        accept=".csv"></div>
+                <div class="field"><label for="file-martes">Martes</label><input id="file-martes" type="file"
+                        accept=".csv"></div>
+                <div class="field"><label for="file-miercoles">Miércoles</label><input id="file-miercoles" type="file"
+                        accept=".csv"></div>
+                <div class="field"><label for="file-jueves">Jueves</label><input id="file-jueves" type="file"
+                        accept=".csv"></div>
+                <div class="field"><label for="file-viernes">Viernes</label><input id="file-viernes" type="file"
+                        accept=".csv"></div>
+            </div>
+            <div class="actions">
+                <button id="btn-procesar" class="primary">Procesar CSV</button>
+                <button id="btn-limpiar">Limpiar</button>
+                <button id="btn-descargar" disabled>Descargar horarios.json</button>
+            </div>
+            <div id="status" class="status"></div>
+            <div class="preview">
+                <label for="json-preview"><strong>Vista previa JSON</strong></label>
+                <textarea id="json-preview" readonly placeholder="Aquí aparecerá el JSON consolidado"></textarea>
+                <div class="footer-note">Consejo: Abre y reemplaza el contenido de <code>horarios.json</code> con la
+                    descarga.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const REQUIRED_HEADERS = ["grupo", "salon", "hora_inicio", "hora_fin", "materia", "profesor"]; // "dia" se añade por archivo
+
+        const dayInputs = [
+            { id: 'file-lunes', dia: 'Lunes' },
+            { id: 'file-martes', dia: 'Martes' },
+            { id: 'file-miercoles', dia: 'Miércoles' },
+            { id: 'file-jueves', dia: 'Jueves' },
+            { id: 'file-viernes', dia: 'Viernes' }
+        ];
+
+        const $ = sel => document.querySelector(sel);
+        const statusEl = $('#status');
+        const previewEl = $('#json-preview');
+        const btnProcesar = $('#btn-procesar');
+        const btnLimpiar = $('#btn-limpiar');
+        const btnDescargar = $('#btn-descargar');
+
+        const normalizeHeader = h => (h || '').toString().trim().toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // quita tildes
+            .replace(/\s+/g, '_');
+
+        const HEADER_MAP = new Map([
+            ['grupo', 'grupo'],
+            ['grup', 'grupo'],
+            ['aula', 'salon'],
+            ['salon', 'salon'],
+            ['salón', 'salon'],
+            ['hora_inicio', 'hora_inicio'],
+            ['inicio', 'hora_inicio'],
+            ['hora_ini', 'hora_inicio'],
+            ['hora_fin', 'hora_fin'],
+            ['fin', 'hora_fin'],
+            ['hora_fin\u00b0', 'hora_fin'],
+            ['materia', 'materia'],
+            ['asignatura', 'materia'],
+            ['profesor', 'profesor'],
+            ['docente', 'profesor']
+        ]);
+
+        function parseCSV(text) {
+            const rows = [];
+            let i = 0, cur = '', row = [], inQuotes = false;
+            while (i < text.length) {
+                const ch = text[i];
+                if (ch === '"') {
+                    if (inQuotes && text[i + 1] === '"') { cur += '"'; i += 2; continue; }
+                    inQuotes = !inQuotes; i++; continue;
+                }
+                if (!inQuotes && (ch === ',')) { row.push(cur); cur = ''; i++; continue; }
+                if (!inQuotes && (ch === '\n' || ch === '\r')) {
+                    if (cur.length > 0 || row.length > 0) { row.push(cur); rows.push(row); row = []; cur = ''; }
+                    // consumir \r\n
+                    if (ch === '\r' && text[i + 1] === '\n') i++;
+                    i++; continue;
+                }
+                cur += ch; i++;
+            }
+            if (cur.length > 0 || row.length > 0) { row.push(cur); rows.push(row); }
+            return rows;
+        }
+
+        function mapHeaders(rawHeaders) {
+            const mapped = rawHeaders.map(h => HEADER_MAP.get(normalizeHeader(h)) || normalizeHeader(h));
+            return mapped;
+        }
+
+        function rowsToObjects(rows) {
+            if (!rows.length) return { headers: [], data: [] };
+            const headers = mapHeaders(rows[0]);
+            const data = [];
+            for (let r = 1; r < rows.length; r++) {
+                const row = rows[r];
+                if (row.every(cell => (cell || '').trim() === '')) continue; // saltar filas vacías
+                const obj = {};
+                for (let c = 0; c < headers.length; c++) {
+                    const key = headers[c];
+                    if (!key) continue;
+                    obj[key] = (row[c] ?? '').toString().trim();
+                }
+                data.push(obj);
+            }
+            return { headers, data };
+        }
+
+        function validateColumns(headers) {
+            const missing = REQUIRED_HEADERS.filter(h => !headers.includes(h));
+            return { ok: missing.length === 0, missing };
+        }
+
+        function showStatus(items) {
+            statusEl.innerHTML = '';
+            const frag = document.createDocumentFragment();
+            items.forEach(it => {
+                const div = document.createElement('div');
+                div.className = 'status-item';
+                div.innerHTML = `<strong>${it.title}</strong><div class="${it.type}">${it.message}</div>${it.details ? it.details : ''}`;
+                frag.appendChild(div);
+            });
+            statusEl.appendChild(frag);
+        }
+
+        async function readFile(file) {
+            return new Promise((resolve, reject) => {
+                const fr = new FileReader();
+                fr.onload = () => resolve(fr.result);
+                fr.onerror = () => reject(fr.error);
+                fr.readAsText(file, 'utf-8');
+            });
+        }
+
+        function sanitizeTime(t) {
+            const s = (t || '').trim();
+            if (!s) return '';
+            const m = s.match(/^(\d{1,2})[:\.](\d{2})(?:\s*(?:h|hrs|hrs\.|hrs:))?$/i);
+            if (m) {
+                const hh = String(parseInt(m[1], 10)).padStart(2, '0');
+                const mm = m[2];
+                return `${hh}:${mm}`;
+            }
+            // ya en formato 24h
+            if (/^\d{2}:\d{2}$/.test(s)) return s;
+            return s;
+        }
+
+        function toItem(obj, dia) {
+            return {
+                grupo: obj.grupo || '',
+                salon: obj.salon || '',
+                dia,
+                hora_inicio: sanitizeTime(obj.hora_inicio || ''),
+                hora_fin: sanitizeTime(obj.hora_fin || ''),
+                materia: obj.materia || '',
+                profesor: obj.profesor || ''
+            };
+        }
+
+        btnProcesar.addEventListener('click', async () => {
+            const status = [];
+            const allItems = [];
+            for (const { id, dia } of dayInputs) {
+                const inp = document.getElementById(id);
+                if (!inp || !inp.files || !inp.files[0]) {
+                    status.push({ title: dia, type: 'warn', message: 'Sin archivo, se omitirá.' });
+                    continue;
+                }
+                try {
+                    const text = await readFile(inp.files[0]);
+                    const rows = parseCSV(text);
+                    const { headers, data } = rowsToObjects(rows);
+                    const v = validateColumns(headers);
+                    if (!v.ok) {
+                        status.push({ title: dia, type: 'err', message: `Faltan columnas: ${v.missing.join(', ')}` });
+                        continue;
+                    }
+                    const mapped = data.map(row => toItem(row, dia));
+                    allItems.push(...mapped);
+                    status.push({ title: dia, type: 'ok', message: `OK: ${mapped.length} filas procesadas.` });
+                } catch (err) {
+                    status.push({ title: dia, type: 'err', message: `Error al leer o procesar: ${err && err.message ? err.message : 'desconocido'}` });
+                }
+            }
+
+            if (allItems.length) {
+                // orden opcional por día y hora_inicio
+                const dayOrder = new Map([["Lunes", 1], ["Martes", 2], ["Miércoles", 3], ["Jueves", 4], ["Viernes", 5]]);
+                allItems.sort((a, b) => (dayOrder.get(a.dia) - dayOrder.get(b.dia)) || (a.hora_inicio.localeCompare(b.hora_inicio)) || a.salon.localeCompare(b.salon));
+                previewEl.value = JSON.stringify(allItems, null, 2);
+                btnDescargar.disabled = false;
+                status.unshift({ title: 'Resultado', type: 'ok', message: `Total registros: ${allItems.length}` });
+            } else {
+                previewEl.value = '';
+                btnDescargar.disabled = true;
+                status.unshift({ title: 'Resultado', type: 'warn', message: 'No se generó contenido. Revisa errores.' });
+            }
+            showStatus(status);
+        });
+
+        btnDescargar.addEventListener('click', () => {
+            try {
+                const text = previewEl.value || '[]';
+                const blob = new Blob([text], { type: 'application/json;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'horarios.json';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            } catch { }
+        });
+
+        btnLimpiar.addEventListener('click', () => {
+            dayInputs.forEach(({ id }) => { const inp = document.getElementById(id); if (inp) inp.value = '' });
+            statusEl.innerHTML = '';
+            previewEl.value = '';
+            btnDescargar.disabled = true;
+        });
+    </script>
+</body>
+
+</html>

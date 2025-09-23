@@ -1,36 +1,601 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visor de Horarios CETIS 76</title>
     <style>
-        body{font-family:system-ui,sans-serif;margin:0;background-color:#f4f6f9;color:#34495e}
-        .app-container{max-width:1600px;margin:0 auto;padding:15px}
-        header{background-color:#2c3e50;color:#ecf0f1;padding:20px;text-align:center;border-radius:8px;margin-bottom:20px;box-shadow:0 4px 6px #0000001a}
-        header h1{margin:0;font-size:1.8em}
-        .controls{display:flex;justify-content:center;align-items:center;gap:15px;padding:15px;background-color:#fff;border-radius:8px;margin-bottom:20px;box-shadow:0 4px 6px #0000001a}
-        #day-selector button{padding:10px 15px;border:1px solid #dee2e6;border-radius:5px;font-size:1em;background-color:#fff;cursor:pointer;transition:all .2s ease-in-out}
-        #day-selector button.active{background-color:#3498db;color:#fff;border-color:#3498db}
-        .schedule-container{overflow-x:auto;background-color:#fff;border-radius:8px;box-shadow:0 4px 6px #0000001a}
-        table{width:100%;border-collapse:collapse;white-space:nowrap}
-        th,td{border:1px solid #dee2e6;padding:12px;text-align:center;min-width:120px}
-        th{background-color:#e9ecef;font-weight:600;position:sticky;top:0;z-index:2}
-        td.row-header{font-weight:600;background-color:#f8f9fa;position:sticky;left:0;z-index:1}
-        .class-cell{padding:5px;font-size:.9em;cursor:pointer;border-radius:5px;color:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:60px;transition:transform .2s}
-        .class-cell:hover{transform:scale(1.05);z-index:10}
-        .cell-group{font-size:.9em}
-        .cell-teacher{font-size:1.1em;font-weight:700}
-        .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background-color:#00000080}
-        .modal-content{background-color:#fff;margin:10% auto;padding:25px;border-radius:8px;width:90%;max-width:500px;box-shadow:0 5px 15px #0000004d}
-        .modal-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #dee2e6;padding-bottom:15px;margin-bottom:15px}
-        .modal-header h2{margin:0;color:#2c3e50}
-        .close-button{color:#aaa;font-size:28px;font-weight:700;cursor:pointer}
+        :root {
+            --ui-scale: 1;
+        }
+
+        body[data-ui-size="small"] {
+            --ui-scale: .9;
+        }
+
+        body[data-ui-size="normal"] {
+            --ui-scale: 1;
+        }
+
+        body[data-ui-size="large"] {
+            --ui-scale: 1.2;
+        }
+
+        body[data-ui-size="xlarge"] {
+            --ui-scale: 1.4;
+        }
+
+        body {
+            font-family: system-ui, sans-serif;
+            margin: 0;
+            background-color: #f4f6f9;
+            color: #34495e
+        }
+
+        .app-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 15px
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 12px 16px;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 6px #0000001a
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: calc(1.4em * var(--ui-scale));
+            line-height: 1.2
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 10px 12px;
+            padding: 10px 12px;
+            background-color: #fff;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 6px #0000001a;
+            position: relative;
+            position: sticky;
+            top: 0;
+            z-index: 50
+        }
+
+        .controls input[type="text"] {
+            padding: calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            font-size: calc(1em * var(--ui-scale));
+            min-width: 280px
+        }
+
+        /* Autocompletado */
+        .autocomplete {
+            position: relative;
+            display: inline-block
+        }
+
+        .autocomplete-list {
+            position: absolute;
+            z-index: 1200;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            box-shadow: 0 8px 20px #00000026;
+            margin-top: 6px;
+            max-height: 50vh;
+            overflow: auto;
+            display: none
+        }
+
+        .autocomplete-list.open {
+            display: block
+        }
+
+        .autocomplete-item {
+            padding: 8px 10px;
+            cursor: pointer;
+            font-size: .95em
+        }
+
+        .autocomplete-item[aria-selected="true"],
+        .autocomplete-item:hover {
+            background: #f1f3f5
+        }
+
+        #day-selector button,
+        #view-selector button {
+            padding: calc(8px * var(--ui-scale)) calc(12px * var(--ui-scale));
+            border: 1px solid #dee2e6;
+            border-radius: 999px;
+            font-size: calc(.95em * var(--ui-scale));
+            background-color: #fff;
+            cursor: pointer;
+            transition: all .15s ease-in-out
+        }
+
+        #day-selector button.active,
+        #view-selector button.active {
+            background-color: #3498db;
+            color: #fff;
+            border-color: #3498db
+        }
+
+        #view-selector {
+            display: inline-flex;
+            background: #f8f9fa;
+            padding: 4px;
+            border-radius: 999px;
+            border: 1px solid #e9ecef;
+            gap: 4px
+        }
+
+        #view-selector button:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+            background-color: #fff;
+            color: #6c757d;
+            border-color: #e9ecef
+        }
+
+        #teacher-select {
+            padding: calc(8px * var(--ui-scale)) calc(10px * var(--ui-scale));
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-size: calc(.95em * var(--ui-scale));
+            min-width: 220px;
+            background-color: #fff
+        }
+
+        #group-select {
+            padding: calc(8px * var(--ui-scale)) calc(10px * var(--ui-scale));
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-size: calc(.95em * var(--ui-scale));
+            min-width: 200px;
+            background-color: #fff
+        }
+
+        #size-trigger {
+            padding: calc(6px * var(--ui-scale)) calc(10px * var(--ui-scale));
+            border: 1px solid #dee2e6;
+            border-radius: 999px;
+            font-size: calc(.95em * var(--ui-scale));
+            background-color: #fff;
+            cursor: pointer;
+            line-height: 1;
+            color: #2c3e50
+        }
+
+        #now-toggle,
+        #reset-btn,
+        #filters-trigger {
+            padding: calc(6px * var(--ui-scale)) calc(10px * var(--ui-scale));
+            border: 1px solid #dee2e6;
+            border-radius: 999px;
+            font-size: calc(.95em * var(--ui-scale));
+            background-color: #fff;
+            cursor: pointer;
+            line-height: 1;
+            color: #2c3e50
+        }
+
+        #now-toggle.active {
+            background: #e7f5ff;
+            border-color: #a5d8ff;
+            color: #1971c2
+        }
+
+        /* Switch para "Ahora" */
+        #now-toggle.switch {
+            width: 44px;
+            height: 26px;
+            padding: 0;
+            border-radius: 999px;
+            background: #e9ecef;
+            border-color: #dee2e6;
+            position: relative;
+        }
+
+        #now-toggle.switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 1px 2px #00000026;
+            transition: transform .15s ease-in-out;
+        }
+
+        #now-toggle.switch.active {
+            background: #74c0fc;
+            border-color: #4dabf7;
+        }
+
+        #now-toggle.switch.active::after {
+            transform: translateX(18px)
+        }
+
+        .size-menu {
+            position: fixed;
+            z-index: 1100;
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            box-shadow: 0 8px 20px #00000026;
+            padding: 6px;
+            display: none;
+            min-width: 180px
+        }
+
+        .size-menu.open {
+            display: block
+        }
+
+        .size-menu h3 {
+            margin: 6px 8px 8px;
+            font-size: calc(.9em * var(--ui-scale));
+            color: #495057;
+            font-weight: 600
+        }
+
+        .size-menu button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: calc(8px * var(--ui-scale));
+            border: 0;
+            background: transparent;
+            border-radius: 6px;
+            font-size: calc(.95em * var(--ui-scale));
+            cursor: pointer;
+            color: #2c3e50
+        }
+
+        .size-menu button:hover,
+        .size-menu button.active {
+            background: #f1f3f5
+        }
+
+        /* Filtros compactos en móvil */
+        #filters-trigger {
+            padding: calc(6px * var(--ui-scale)) calc(10px * var(--ui-scale));
+            border: 1px solid #dee2e6;
+            border-radius: 999px;
+            font-size: calc(.95em * var(--ui-scale));
+            background-color: #fff;
+            cursor: pointer;
+            line-height: 1;
+            color: #2c3e50;
+            display: none
+        }
+
+        .filters-menu {
+            position: fixed;
+            z-index: 1100;
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            box-shadow: 0 8px 20px #00000026;
+            padding: 10px;
+            display: none;
+            min-width: 260px
+        }
+
+        .filters-menu.open {
+            display: block
+        }
+
+        .filters-menu h3 {
+            margin: 4px 6px 10px;
+            font-size: calc(.9em * var(--ui-scale));
+            color: #495057;
+            font-weight: 600
+        }
+
+        .filters-menu select {
+            width: 100%;
+            margin: 6px 0;
+            padding: calc(8px * var(--ui-scale)) calc(10px * var(--ui-scale));
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-size: calc(.95em * var(--ui-scale));
+            background: #fff
+        }
+
+        @media (max-width: 640px) {
+
+            #teacher-select,
+            #group-select {
+                display: none
+            }
+
+            #filters-trigger {
+                display: inline-block
+            }
+        }
+
+        .schedule-container {
+            overflow: auto;
+            max-height: 75vh;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px #0000001a
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            white-space: nowrap
+        }
+
+        th,
+        td {
+            border: 1px solid #dee2e6;
+            padding: calc(12px * var(--ui-scale));
+            text-align: center;
+            min-width: 120px
+        }
+
+        th {
+            background-color: #e9ecef;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 2
+        }
+
+        thead th:first-child {
+            left: 0;
+            z-index: 3
+        }
+
+        td.row-header {
+            font-weight: 600;
+            background-color: #f8f9fa;
+            position: sticky;
+            left: 0;
+            z-index: 1
+        }
+
+        .class-cell {
+            padding: calc(5px * var(--ui-scale));
+            font-size: calc(.9em * var(--ui-scale));
+            cursor: pointer;
+            border-radius: 5px;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(60px * var(--ui-scale));
+            transition: transform .2s
+        }
+
+        .class-cell:hover {
+            transform: scale(1.05);
+            z-index: 10
+        }
+
+        .cell-group {
+            font-size: calc(.9em * var(--ui-scale))
+        }
+
+        .cell-teacher {
+            font-size: calc(1.1em * var(--ui-scale));
+            font-weight: 700
+        }
+
+        /* Indicadores de "ahora" */
+        .is-now-col {
+            background-color: #fff9db !important
+        }
+
+        .is-now-cell {
+            outline: 2px solid #ffd43b
+        }
+
+        .is-today-col {
+            background-color: #e7f5ff !important
+        }
+
+        /* Compactación móvil */
+        @media (max-width: 640px) {
+
+            th,
+            td {
+                padding: 8px
+            }
+
+            .class-cell {
+                min-height: 46px
+            }
+
+            header h1 {
+                font-size: 1.1em
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #00000080;
+            -webkit-backdrop-filter: blur(3px) saturate(120%);
+            backdrop-filter: blur(3px) saturate(120%);
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 25px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px #0000004d;
+            will-change: transform, opacity;
+            border-top: 6px solid var(--modal-accent, #3498db)
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 15px;
+            margin-bottom: 15px
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #2c3e50
+        }
+
+        .close-button {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: 700;
+            cursor: pointer
+        }
+
+        #close-modal {
+            color: var(--modal-accent-contrast, #2c3e50);
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            user-select: none;
+            width: 36px;
+            height: 36px;
+            display: grid;
+            place-items: center;
+            border-radius: 999px;
+            transition: background-color .15s ease, transform .15s ease, color .15s ease, box-shadow .15s ease;
+            outline: none;
+            background: #fff;
+            box-shadow: 0 0 0 1px color-mix(in srgb, var(--modal-accent, #3498db) 30%, transparent)
+        }
+
+        #close-modal:hover {
+            background-color: color-mix(in srgb, var(--modal-accent, #3498db) 12%, #f1f3f5);
+            transform: scale(1.05)
+        }
+
+        #close-modal:active {
+            transform: scale(.98)
+        }
+
+        #close-modal:focus-visible {
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--modal-accent, #3498db) 35%, #e7f1ff);
+            color: var(--modal-accent, #3498db)
+        }
+
+        /* Animaciones del modal */
+        @keyframes modal-backdrop-in {
+            from {
+                opacity: 0
+            }
+
+            to {
+                opacity: 1
+            }
+        }
+
+        @keyframes modal-backdrop-out {
+            from {
+                opacity: 1
+            }
+
+            to {
+                opacity: 0
+            }
+        }
+
+        @keyframes modal-content-in {
+            from {
+                transform: translateY(8px) scale(.98);
+                opacity: 0
+            }
+
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1
+            }
+        }
+
+        @keyframes modal-content-out {
+            from {
+                transform: translateY(0) scale(1);
+                opacity: 1
+            }
+
+            to {
+                transform: translateY(8px) scale(.98);
+                opacity: 0
+            }
+        }
+
+        .modal.open {
+            display: block;
+            animation: modal-backdrop-in .18s ease-out both
+        }
+
+        .modal.closing {
+            animation: modal-backdrop-out .14s ease-in both
+        }
+
+        .modal.open .modal-content {
+            animation: modal-content-in .22s cubic-bezier(.22, 1, .36, 1) both
+        }
+
+        .modal.closing .modal-content {
+            animation: modal-content-out .16s ease both
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .modal.open,
+            .modal.closing {
+                animation: none
+            }
+
+            .modal.open .modal-content,
+            .modal.closing .modal-content {
+                animation: none
+            }
+
+            #close-modal {
+                transition: none
+            }
+        }
     </style>
 </head>
+
 <body>
     <div class="app-container">
-        <header><h1>Visor de Horarios CETIS 76</h1></header>
+        <header>
+            <h1>Visor de Horarios CETIS 76</h1>
+        </header>
         <div class="controls">
             <div id="day-selector">
                 <button data-day="Lunes" class="active">L</button>
@@ -39,43 +604,218 @@
                 <button data-day="Jueves">J</button>
                 <button data-day="Viernes">V</button>
             </div>
+            <div id="view-selector">
+                <button data-view="dia" class="active">Día</button>
+                <button data-view="semana">Semana</button>
+            </div>
+            <button id="now-toggle" role="switch" aria-checked="false" class="switch"
+                title="Indicadores ahora"></button>
+            <button id="size-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="size-menu"
+                title="Tamaño de interfaz">Aa</button>
+            <button id="filters-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="filters-menu"
+                title="Filtros de maestro y grupo">Filtros</button>
+            <select id="teacher-select" aria-label="Seleccionar maestro">
+                <option value="">Todos los maestros</option>
+            </select>
+            <select id="group-select" aria-label="Seleccionar grupo">
+                <option value="">Todos los grupos</option>
+            </select>
+            <span class="autocomplete" style="min-width:280px">
+                <input id="search-input" type="text" placeholder="Buscar: materia, docente, grupo o aula"
+                    aria-label="Buscar" aria-autocomplete="list" aria-controls="search-list" aria-expanded="false"
+                    role="combobox" />
+                <div id="search-list" class="autocomplete-list" role="listbox" aria-label="Sugerencias de búsqueda">
+                </div>
+            </span>
+            <button id="reset-btn" title="Limpiar filtros y búsqueda" aria-label="Reset filtros">↺</button>
         </div>
-        <div class="schedule-container"><table id="schedule-table"></table></div>
+        <div id="size-menu" class="size-menu" role="menu" aria-label="Tamaño de interfaz">
+            <h3>Escala de interfaz</h3>
+            <button role="menuitemradio" data-size="small">Pequeño</button>
+            <button role="menuitemradio" data-size="normal" class="active">Normal</button>
+            <button role="menuitemradio" data-size="large">Grande</button>
+            <button role="menuitemradio" data-size="xlarge">Muy grande</button>
+        </div>
+        <div id="filters-menu" class="filters-menu" role="menu" aria-label="Filtros">
+            <h3>Filtros</h3>
+            <select id="teacher-select-inline" aria-label="Seleccionar maestro (menú)">
+                <option value="">Todos los maestros</option>
+            </select>
+            <select id="group-select-inline" aria-label="Seleccionar grupo (menú)">
+                <option value="">Todos los grupos</option>
+            </select>
+        </div>
+        <div class="schedule-container">
+            <table id="schedule-table"></table>
+        </div>
     </div>
     <div id="class-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-header"><h2 id="modal-title"></h2><span id="close-modal">&times;</span></div>
+            <div class="modal-header">
+                <h2 id="modal-title"></h2><span id="close-modal">&times;</span>
+            </div>
             <div id="modal-body"></div>
         </div>
     </div>
     <script>
-        const data = [{"grupo":"1° A ENF","salon":"A7","dia":"Lunes","hora_inicio":"14:30","hora_fin":"15:20","materia":"La materia y sus interacciones","profesor":"Orozco Colin Asunción"},{"grupo":"1° A ENF","salon":"A7","dia":"Lunes","hora_inicio":"15:20","hora_fin":"16:10","materia":"La materia y sus interacciones","profesor":"Orozco Colin Asunción"}];
+        const data = [{ "grupo": "1° A ENF", "salon": "A7", "dia": "Lunes", "hora_inicio": "14:30", "hora_fin": "15:20", "materia": "La materia y sus interacciones", "profesor": "Orozco Colin Asunción" }, { "grupo": "1° A ENF", "salon": "A7", "dia": "Lunes", "hora_inicio": "15:20", "hora_fin": "16:10", "materia": "La materia y sus interacciones", "profesor": "Orozco Colin Asunción" }];
         // Aquí iría el resto del array JSON completo de la respuesta anterior
-       const horariosData=[{"grupo":"1° A ENF","salon":"A7","dia":"Lunes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Socioemocional I","profesor":"Morales Vigueras Eduardo Adán"},{"grupo":"1° A ENF","salon":"A7","dia":"Lunes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Lengua I","profesor":"Olvera Jiménez María Lina"},{"grupo":"1° A ENF","salon":"A7","dia":"Lunes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Lengua I","profesor":"Olvera Jiménez María Lina"},{"grupo":"1° A ENF","salon":"A7","dia":"Lunes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Ingles I","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"1° A ENF","salon":"A7","dia":"Lunes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Ingles I","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"1° A ENF","salon":"A7","dia":"Lunes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Pensamiento I","profesor":"Silva Magaña Miguel Atl"},{"grupo":"1° A ENF","salon":"A7","dia":"Lunes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Pensamiento I","profesor":"Silva Magaña Miguel Atl"},{"grupo":"1° A ENF","salon":"A7","dia":"Martes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1° A ENF","salon":"A7","dia":"Martes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1° A ENF","salon":"A7","dia":"Martes","hora_inicio":"16:10","hora_fin":"17:00","materia":"La materia y sus interacciones","profesor":"Orozco Colin Asunción"},{"grupo":"1° A ENF","salon":"A7","dia":"Martes","hora_inicio":"17:00","hora_fin":"17:50","materia":"La materia y sus interacciones","profesor":"Orozco Colin Asunción"},{"grupo":"1° A ENF","salon":"A7","dia":"Martes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Prope de Enfermería","profesor":"Mendoza Hernandez Myriam Guadalupe"},{"grupo":"1° A ENF","salon":"A7","dia":"Martes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Prope de Enfermería","profesor":"Mendoza Hernandez Myriam Guadalupe"},{"grupo":"1° A ENF","salon":"A7","dia":"Martes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Tutoría I","profesor":"Silva Magaña Miguel Atl"},{"grupo":"1° A ENF","salon":"A7","dia":"Martes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Tutoría I","profesor":"Silva Magaña Miguel Atl"},{"grupo":"1° A ENF","salon":"A7","dia":"Miércoles","hora_inicio":"14:30","hora_fin":"15:20","materia":"Ingles I","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"1° A ENF","salon":"A7","dia":"Miércoles","hora_inicio":"15:20","hora_fin":"16:10","materia":"Lengua I","profesor":"Olvera Jiménez María Lina"},{"grupo":"1° A ENF","salon":"A7","dia":"Miércoles","hora_inicio":"16:10","hora_fin":"17:00","materia":"Ciencias Sociales I","profesor":"Lazcano Campos José de Jesús"},{"grupo":"1° A ENF","salon":"A7","dia":"Miércoles","hora_inicio":"17:00","hora_fin":"17:50","materia":"Ciencias Sociales I","profesor":"Lazcano Campos José de Jesús"},{"grupo":"1° A ENF","salon":"A7","dia":"Miércoles","hora_inicio":"18:10","hora_fin":"18:55","materia":"Cultura Digital I","profesor":"Pérez Fajardo Marco Antonio"},{"grupo":"1° A ENF","salon":"A7","dia":"Miércoles","hora_inicio":"18:55","hora_fin":"19:40","materia":"Cultura Digital I","profesor":"Pérez Fajardo Marco Antonio"},{"grupo":"1° A ENF","salon":"A7","dia":"Miércoles","hora_inicio":"19:40","hora_fin":"20:25","materia":"Cultura Digital I","profesor":"Pérez Fajardo Marco Antonio"},{"grupo":"1° A ENF","salon":"A7","dia":"Jueves","hora_inicio":"14:30","hora_fin":"15:20","materia":"La materia y sus interacciones","profesor":"Orozco Colin Asunción"},{"grupo":"1° A ENF","salon":"A7","dia":"Jueves","hora_inicio":"15:20","hora_fin":"16:10","materia":"La materia y sus interacciones","profesor":"Orozco Colin Asunción"},{"grupo":"1° A ENF","salon":"A7","dia":"Jueves","hora_inicio":"16:10","hora_fin":"17:00","materia":"Prope de Enfermería","profesor":"Mendoza Hernandez Myriam Guadalupe"},{"grupo":"1° A ENF","salon":"A7","dia":"Jueves","hora_inicio":"17:00","hora_fin":"17:50","materia":"Pensamiento I","profesor":"Silva Magaña Miguel Atl"},{"grupo":"1° A ENF","salon":"A7","dia":"Jueves","hora_inicio":"18:10","hora_fin":"18:55","materia":"Pensamiento I","profesor":"Silva Magaña Miguel Atl"},{"grupo":"1° A ENF","salon":"A7","dia":"Viernes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1° A ENF","salon":"A7","dia":"Viernes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1° A ENF","salon":"A7","dia":"Viernes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Prope de Enfermería","profesor":"Mendoza Hernandez Myriam Guadalupe"},{"grupo":"1° A ENF","salon":"A7","dia":"Viernes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Prope de Enfermería","profesor":"Mendoza Hernandez Myriam Guadalupe"},{"grupo":"1° A ENF","salon":"A7","dia":"Viernes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Prope de Enfermería","profesor":"Mendoza Hernandez Myriam Guadalupe"},{"grupo":"1º B ENF","salon":"A8","dia":"Lunes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Socioemocional I","profesor":"Morales Vigueras Eduardo Adán"},{"grupo":"1º B ENF","salon":"A8","dia":"Lunes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Cultura Digital I","profesor":"Pérez Fajardo Marco Antonio"},{"grupo":"1º B ENF","salon":"A8","dia":"Lunes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Prope de Enfermería","profesor":"Guerrero Vera Carlos"},{"grupo":"1º B ENF","salon":"A8","dia":"Lunes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Prope de Enfermería","profesor":"Guerrero Vera Carlos"},{"grupo":"1º B ENF","salon":"A8","dia":"Lunes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Pensamiento I","profesor":"Silva Magaña Miguel Atl"},{"grupo":"1º B ENF","salon":"A8","dia":"Lunes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Pensamiento I","profesor":"Silva Magaña Miguel Atl"},{"grupo":"1º B ENF","salon":"A8","dia":"Lunes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Ingles I","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"1º B ENF","salon":"A8","dia":"Lunes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Ingles I","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"1º B ENF","salon":"A8","dia":"Martes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Prope de Enfermería","profesor":"Guerrero Vera Carlos"},{"grupo":"1º B ENF","salon":"A8","dia":"Martes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Prope de Enfermería","profesor":"Guerrero Vera Carlos"},{"grupo":"1º B ENF","salon":"A8","dia":"Martes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Lengua I","profesor":"Olvera Jiménez María Lina"},{"grupo":"1º B ENF","salon":"A8","dia":"Martes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Lengua I","profesor":"Olvera Jiménez María Lina"},{"grupo":"1º B ENF","salon":"A8","dia":"Martes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1º B ENF","salon":"A8","dia":"Martes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1º B ENF","salon":"A8","dia":"Miércoles","hora_inicio":"14:30","hora_fin":"15:20","materia":"Ciencias Sociales I","profesor":"Lazcano Campos José de Jesús"},{"grupo":"1º B ENF","salon":"A8","dia":"Miércoles","hora_inicio":"15:20","hora_fin":"16:10","materia":"Ciencias Sociales I","profesor":"Lazcano Campos José de Jesús"},{"grupo":"1º B ENF","salon":"A8","dia":"Miércoles","hora_inicio":"16:10","hora_fin":"17:00","materia":"Lengua I","profesor":"Olvera Jiménez María Lina"},{"grupo":"1º B ENF","salon":"A8","dia":"Miércoles","hora_inicio":"17:00","hora_fin":"17:50","materia":"Ingles I","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"1º B ENF","salon":"A8","dia":"Miércoles","hora_inicio":"18:10","hora_fin":"18:55","materia":"La materia y sus interacciones","profesor":"Orozco Colin Asunción"},{"grupo":"1º B ENF","salon":"A8","dia":"Miércoles","hora_inicio":"18:55","hora_fin":"19:40","materia":"La materia y sus interacciones","profesor":"Orozco Colin Asunción"},{"grupo":"1º B ENF","salon":"A8","dia":"Miércoles","hora_inicio":"19:40","hora_fin":"20:25","materia":"Pensamiento I","profesor":"Silva Magaña Miguel Atl"},{"grupo":"1º B ENF","salon":"A8","dia":"Miércoles","hora_inicio":"20:25","hora_fin":"21:10","materia":"Pensamiento I","profesor":"Silva Magaña Miguel Atl"},{"grupo":"1º B ENF","salon":"A8","dia":"Jueves","hora_inicio":"14:30","hora_fin":"15:20","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1º B ENF","salon":"A8","dia":"Jueves","hora_inicio":"15:20","hora_fin":"16:10","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1º B ENF","salon":"A8","dia":"Jueves","hora_inicio":"16:10","hora_fin":"17:00","materia":"Prope de Enfermería","profesor":"Guerrero Vera Carlos"},{"grupo":"1º B ENF","salon":"A8","dia":"Jueves","hora_inicio":"17:00","hora_fin":"17:50","materia":"Prope de Enfermería","profesor":"Guerrero Vera Carlos"},{"grupo":"1º B ENF","salon":"A8","dia":"Jueves","hora_inicio":"18:10","hora_fin":"18:55","materia":"La materia y sus interacciones","profesor":"Orozco Colin Asunción"},{"grupo":"1º B ENF","salon":"A8","dia":"Jueves","hora_inicio":"18:55","hora_fin":"19:40","materia":"La materia y sus interacciones","profesor":"Orozco Colin Asunción"},{"grupo":"1º B ENF","salon":"A8","dia":"Jueves","hora_inicio":"19:40","hora_fin":"20:25","materia":"Tutoría I","profesor":"Silva Magaña Miguel Atl"},{"grupo":"1º B ENF","salon":"A8","dia":"Jueves","hora_inicio":"20:25","hora_fin":"21:10","materia":"Tutoría I","profesor":"Silva Magaña Miguel Atl"},{"grupo":"1° C ENF","salon":"A16","dia":"Lunes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1° C ENF","salon":"A16","dia":"Lunes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Tutoría I","profesor":"López Fernández Israel Baruc"},{"grupo":"1° C ENF","salon":"A16","dia":"Lunes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Cultura Digital I","profesor":"Pérez Fajardo Marco Antonio"},{"grupo":"1° C ENF","salon":"A16","dia":"Lunes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Cultura Digital I","profesor":"Pérez Fajardo Marco Antonio"},{"grupo":"1° C ENF","salon":"A16","dia":"Lunes","hora_inicio":"18:10","hora_fin":"18:55","materia":"La materia y sus interacciones","profesor":"Zambrano González Sigfrido"},{"grupo":"1° C ENF","salon":"A16","dia":"Lunes","hora_inicio":"18:55","hora_fin":"19:40","materia":"La materia y sus interacciones","profesor":"Zambrano González Sigfrido"},{"grupo":"1° C ENF","salon":"A16","dia":"Lunes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Lengua I","profesor":"Olvera Jiménez María Lina"},{"grupo":"1° C ENF","salon":"A16","dia":"Lunes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Lengua I","profesor":"Olvera Jiménez María Lina"},{"grupo":"1° C ENF","salon":"A16","dia":"Martes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Ingles I","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"1° C ENF","salon":"A16","dia":"Martes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Ingles I","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"1° C ENF","salon":"A16","dia":"Martes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Ciencias Sociales I","profesor":"Lazcano Campos José de Jesús"},{"grupo":"1° C ENF","salon":"A16","dia":"Martes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Ciencias Sociales I","profesor":"Lazcano Campos José de Jesús"},{"grupo":"1° C ENF","salon":"A16","dia":"Miércoles","hora_inicio":"14:30","hora_fin":"15:20","materia":"Prope de Enfermería","profesor":"Guerrero Vera Carlos"},{"grupo":"1° C ENF","salon":"A16","dia":"Miércoles","hora_inicio":"15:20","hora_fin":"16:10","materia":"Prope de Enfermería","profesor":"Guerrero Vera Carlos"},{"grupo":"1° C ENF","salon":"A16","dia":"Miércoles","hora_inicio":"16:10","hora_fin":"17:00","materia":"Prope de Enfermería","profesor":"Guerrero Vera Carlos"},{"grupo":"1° C ENF","salon":"A16","dia":"Miércoles","hora_inicio":"17:00","hora_fin":"17:50","materia":"Pensamiento I","profesor":"López Fernández Israel Baruc"},{"grupo":"1° C ENF","salon":"A16","dia":"Miércoles","hora_inicio":"18:10","hora_fin":"18:55","materia":"Pensamiento I","profesor":"López Fernández Israel Baruc"},{"grupo":"1° C ENF","salon":"A16","dia":"Miércoles","hora_inicio":"18:55","hora_fin":"19:40","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1° C ENF","salon":"A16","dia":"Miércoles","hora_inicio":"19:40","hora_fin":"20:25","materia":"La materia y sus interacciones","profesor":"Zambrano González Sigfrido"},{"grupo":"1° C ENF","salon":"A16","dia":"Miércoles","hora_inicio":"20:25","hora_fin":"21:10","materia":"La materia y sus interacciones","profesor":"Zambrano González Sigfrido"},{"grupo":"1° C ENF","salon":"A16","dia":"Jueves","hora_inicio":"15:20","hora_fin":"16:10","materia":"Ingles I","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"1° C ENF","salon":"A16","dia":"Jueves","hora_inicio":"16:10","hora_fin":"17:00","materia":"Cultura Digital I","profesor":"Pérez Fajardo Marco Antonio"},{"grupo":"1° C ENF","salon":"A16","dia":"Jueves","hora_inicio":"17:00","hora_fin":"17:50","materia":"Tutoría I","profesor":"López Fernández Israel Baruc"},{"grupo":"1° C ENF","salon":"A16","dia":"Jueves","hora_inicio":"18:10","hora_fin":"18:55","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1° C ENF","salon":"A16","dia":"Jueves","hora_inicio":"18:55","hora_fin":"19:40","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1° C ENF","salon":"A16","dia":"Viernes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Prope de Enfermería","profesor":"Guerrero Vera Carlos"},{"grupo":"1° C ENF","salon":"A16","dia":"Viernes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Prope de Enfermería","profesor":"Guerrero Vera Carlos"},{"grupo":"1° C ENF","salon":"A16","dia":"Viernes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Prope de Enfermería","profesor":"Guerrero Vera Carlos"},{"grupo":"1° C ENF","salon":"A16","dia":"Viernes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Socioemocional I","profesor":"Morales Vigueras Eduardo Adán"},{"grupo":"1° D ENF","salon":"A17","dia":"Lunes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Prope de Enfermería","profesor":"Guerrero Vera Carlos"},{"grupo":"1° D ENF","salon":"A17","dia":"Lunes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Prope de Enfermería","profesor":"Guerrero Vera Carlos"},{"grupo":"1° D ENF","salon":"A17","dia":"Lunes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Pensamiento I","profesor":"López Fernández Israel Baruc"},{"grupo":"1° D ENF","salon":"A17","dia":"Lunes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Pensamiento I","profesor":"López Fernández Israel Baruc"},{"grupo":"1° D ENF","salon":"A17","dia":"Lunes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Ciencias Sociales I","profesor":"Brondo Vera Adriana"},{"grupo":"1° D ENF","salon":"A17","dia":"Lunes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Ciencias Sociales I","profesor":"Brondo Vera Adriana"},{"grupo":"1° D ENF","salon":"A17","dia":"Lunes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1° D ENF","salon":"A17","dia":"Lunes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1° D ENF","salon":"A17","dia":"Martes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Lengua I","profesor":"Olvera Jiménez María Lina"},{"grupo":"1° D ENF","salon":"A17","dia":"Martes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Lengua I","profesor":"Olvera Jiménez María Lina"},{"grupo":"1° D ENF","salon":"A17","dia":"Martes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Prope de Enfermería","profesor":"Guerrero Vera Carlos"},{"grupo":"1° D ENF","salon":"A17","dia":"Martes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Prope de Enfermería","profesor":"Guerrero Vera Carlos"},{"grupo":"1° D ENF","salon":"A17","dia":"Miércoles","hora_inicio":"14:30","hora_fin":"15:20","materia":"Lengua I","profesor":"Olvera Jiménez María Lina"},{"grupo":"1° D ENF","salon":"A17","dia":"Miércoles","hora_inicio":"15:20","hora_fin":"16:10","materia":"Pensamiento I","profesor":"López Fernández Israel Baruc"},{"grupo":"1° D ENF","salon":"A17","dia":"Miércoles","hora_inicio":"16:10","hora_fin":"17:00","materia":"Pensamiento I","profesor":"López Fernández Israel Baruc"},{"grupo":"1° D ENF","salon":"A17","dia":"Miércoles","hora_inicio":"17:00","hora_fin":"17:50","materia":"Prope de Enfermería","profesor":"Guerrero Vera Carlos"},{"grupo":"1° D ENF","salon":"A17","dia":"Jueves","hora_inicio":"14:30","hora_fin":"15:20","materia":"Socioemocional I","profesor":"Morales Vigueras Eduardo Adán"},{"grupo":"1° D ENF","salon":"A17","dia":"Jueves","hora_inicio":"15:20","hora_fin":"16:10","materia":"Tutoría I","profesor":"López Fernández Israel Baruc"},{"grupo":"1° D ENF","salon":"A17","dia":"Jueves","hora_inicio":"16:10","hora_fin":"17:00","materia":"Tutoría I","profesor":"López Fernández Israel Baruc"},{"grupo":"1° D ENF","salon":"A17","dia":"Jueves","hora_inicio":"17:00","hora_fin":"17:50","materia":"Cultura Digital I","profesor":"Pérez Fajardo Marco Antonio"},{"grupo":"1° D ENF","salon":"A17","dia":"Jueves","hora_inicio":"18:10","hora_fin":"18:55","materia":"Cultura Digital I","profesor":"Pérez Fajardo Marco Antonio"},{"grupo":"1° D ENF","salon":"A17","dia":"Jueves","hora_inicio":"18:55","hora_fin":"19:40","materia":"Cultura Digital I","profesor":"Pérez Fajardo Marco Antonio"},{"grupo":"1° D ENF","salon":"A17","dia":"Jueves","hora_inicio":"19:40","hora_fin":"20:25","materia":"Ingles I","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"1° D ENF","salon":"A17","dia":"Viernes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1° D ENF","salon":"A17","dia":"Viernes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1° D ENF","salon":"A17","dia":"Viernes","hora_inicio":"18:10","hora_fin":"18:55","materia":"La materia y sus interacciones","profesor":"Zambrano González Sigfrido"},{"grupo":"1° D ENF","salon":"A17","dia":"Viernes","hora_inicio":"18:55","hora_fin":"19:40","materia":"La materia y sus interacciones","profesor":"Zambrano González Sigfrido"},{"grupo":"1º E ENF","salon":"A18","dia":"Lunes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Lengua I","profesor":"Olvera Jiménez María Lina"},{"grupo":"1º E ENF","salon":"A18","dia":"Lunes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Lengua I","profesor":"Olvera Jiménez María Lina"},{"grupo":"1º E ENF","salon":"A18","dia":"Lunes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Ciencias Sociales I","profesor":"Brondo Vera Adriana"},{"grupo":"1º E ENF","salon":"A18","dia":"Lunes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Ciencias Sociales I","profesor":"Brondo Vera Adriana"},{"grupo":"1º E ENF","salon":"A18","dia":"Lunes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Pensamiento I","profesor":"López Fernández Israel Baruc"},{"grupo":"1º E ENF","salon":"A18","dia":"Lunes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Pensamiento I","profesor":"López Fernández Israel Baruc"},{"grupo":"1º E ENF","salon":"A18","dia":"Martes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Cultura Digital I","profesor":"Pérez Fajardo Marco Antonio"},{"grupo":"1º E ENF","salon":"A18","dia":"Martes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Pensamiento I","profesor":"López Fernández Israel Baruc"},{"grupo":"1º E ENF","salon":"A18","dia":"Martes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Pensamiento I","profesor":"López Fernández Israel Baruc"},{"grupo":"1º E ENF","salon":"A18","dia":"Martes","hora_inicio":"18:10","hora_fin":"18:55","materia":"La materia y sus interacciones","profesor":"Zambrano González Sigfrido"},{"grupo":"1º E ENF","salon":"A18","dia":"Martes","hora_inicio":"18:55","hora_fin":"19:40","materia":"La materia y sus interacciones","profesor":"Zambrano González Sigfrido"},{"grupo":"1º E ENF","salon":"A18","dia":"Miércoles","hora_inicio":"14:30","hora_fin":"15:20","materia":"Socioemocional I","profesor":"Morales Vigueras Eduardo Adán"},{"grupo":"1º E ENF","salon":"A18","dia":"Miércoles","hora_inicio":"15:20","hora_fin":"16:10","materia":"Cultura Digital I","profesor":"Pérez Fajardo Marco Antonio"},{"grupo":"1º E ENF","salon":"A18","dia":"Miércoles","hora_inicio":"16:10","hora_fin":"17:00","materia":"Cultura Digital I","profesor":"Pérez Fajardo Marco Antonio"},{"grupo":"1º E ENF","salon":"A18","dia":"Miércoles","hora_inicio":"17:00","hora_fin":"17:50","materia":"Tutoría I","profesor":"Vázquez Pérez José Salomón"},{"grupo":"1º E ENF","salon":"A18","dia":"Miércoles","hora_inicio":"18:10","hora_fin":"18:55","materia":"Ingles I","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"1º E ENF","salon":"A18","dia":"Miércoles","hora_inicio":"18:55","hora_fin":"19:40","materia":"Lengua I","profesor":"Olvera Jiménez María Lina"},{"grupo":"1º E ENF","salon":"A18","dia":"Jueves","hora_inicio":"14:30","hora_fin":"15:20","materia":"La materia y sus interacciones","profesor":"Zambrano González Sigfrido"},{"grupo":"1º E ENF","salon":"A18","dia":"Jueves","hora_inicio":"15:20","hora_fin":"16:10","materia":"La materia y sus interacciones","profesor":"Zambrano González Sigfrido"},{"grupo":"1º E ENF","salon":"A18","dia":"Jueves","hora_inicio":"16:10","hora_fin":"17:00","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1º E ENF","salon":"A18","dia":"Jueves","hora_inicio":"17:00","hora_fin":"17:50","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1º E ENF","salon":"A18","dia":"Viernes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Tutoría I","profesor":"Vázquez Pérez José Salomón"},{"grupo":"1º E ENF","salon":"A18","dia":"Viernes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Ingles I","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"1º E ENF","salon":"A18","dia":"Viernes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Ingles I","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"1º E ENF","salon":"A18","dia":"Viernes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Prope de Enfermería","profesor":"Guerrero Vera Carlos"},{"grupo":"1º E ENF","salon":"A18","dia":"Viernes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Prope de Enfermería","profesor":"Guerrero Vera Carlos"},{"grupo":"1º E ENF","salon":"A18","dia":"Viernes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1º E ENF","salon":"A18","dia":"Viernes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1° A RAD","salon":"A22","dia":"Lunes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Lengua I","profesor":"Rodríguez Butanda María de la Cruz"},{"grupo":"1° A RAD","salon":"A22","dia":"Lunes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Lengua I","profesor":"Rodríguez Butanda María de la Cruz"},{"grupo":"1° A RAD","salon":"A22","dia":"Lunes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Ingles I","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"1° A RAD","salon":"A22","dia":"Lunes","hora_inicio":"17:00","hora_fin":"17:50","materia":"La materia y sus interacciones","profesor":"Angulo Jiménez Luis"},{"grupo":"1° A RAD","salon":"A22","dia":"Lunes","hora_inicio":"18:10","hora_fin":"18:55","materia":"La materia y sus interacciones","profesor":"Angulo Jiménez Luis"},{"grupo":"1° A RAD","salon":"A22","dia":"Lunes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Cultura Digital I","profesor":"Mirón Valencia Pedro Ernesto"},{"grupo":"1° A RAD","salon":"A22","dia":"Lunes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Cultura Digital I","profesor":"Mirón Valencia Pedro Ernesto"},{"grupo":"1° A RAD","salon":"A22","dia":"Martes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Prope de Radiología","profesor":"Reyes Hernández Felipe Donaldo"},{"grupo":"1° A RAD","salon":"A22","dia":"Martes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Prope de Radiología","profesor":"Reyes Hernández Felipe Donaldo"},{"grupo":"1° A RAD","salon":"A22","dia":"Martes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Pensamiento I","profesor":"Silva Magaña Miguel Atl"},{"grupo":"1° A RAD","salon":"A22","dia":"Martes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Pensamiento I","profesor":"Silva Magaña Miguel Atl"},{"grupo":"1° A RAD","salon":"A22","dia":"Martes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1° A RAD","salon":"A22","dia":"Martes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1° A RAD","salon":"A22","dia":"Martes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Cultura Digital I","profesor":"Mirón Valencia Pedro Ernesto"},{"grupo":"1° A RAD","salon":"A22","dia":"Miércoles","hora_inicio":"14:30","hora_fin":"15:20","materia":"Lengua I","profesor":"Rodríguez Butanda María de la Cruz"},{"grupo":"1° A RAD","salon":"A22","dia":"Miércoles","hora_inicio":"15:20","hora_fin":"16:10","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1° A RAD","salon":"A22","dia":"Miércoles","hora_inicio":"16:10","hora_fin":"17:00","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1° A RAD","salon":"A22","dia":"Miércoles","hora_inicio":"17:00","hora_fin":"17:50","materia":"Pensamiento I","profesor":"Silva Magaña Miguel Atl"},{"grupo":"1° A RAD","salon":"A22","dia":"Miércoles","hora_inicio":"18:10","hora_fin":"18:55","materia":"Pensamiento I","profesor":"Silva Magaña Miguel Atl"},{"grupo":"1° A RAD","salon":"A22","dia":"Miércoles","hora_inicio":"18:55","hora_fin":"19:40","materia":"Prope de Radiología","profesor":"Reyes Hernández Felipe Donaldo"},{"grupo":"1° A RAD","salon":"A22","dia":"Miércoles","hora_inicio":"19:40","hora_fin":"20:25","materia":"Prope de Radiología","profesor":"Reyes Hernández Felipe Donaldo"},{"grupo":"1° A RAD","salon":"A22","dia":"Jueves","hora_inicio":"14:30","hora_fin":"15:20","materia":"Ciencias Sociales I","profesor":"Lazcano Campos José de Jesús"},{"grupo":"1° A RAD","salon":"A22","dia":"Jueves","hora_inicio":"15:20","hora_fin":"16:10","materia":"Ciencias Sociales I","profesor":"Lazcano Campos José de Jesús"},{"grupo":"1° A RAD","salon":"A22","dia":"Jueves","hora_inicio":"16:10","hora_fin":"17:00","materia":"Prope de Radiología","profesor":"Reyes Hernández Felipe Donaldo"},{"grupo":"1° A RAD","salon":"A22","dia":"Jueves","hora_inicio":"17:00","hora_fin":"17:50","materia":"Prope de Radiología","profesor":"Reyes Hernández Felipe Donaldo"},{"grupo":"1° A RAD","salon":"A22","dia":"Jueves","hora_inicio":"18:10","hora_fin":"18:55","materia":"Tutoría I","profesor":"Díaz Somera Miriam"},{"grupo":"1° A RAD","salon":"A22","dia":"Jueves","hora_inicio":"18:55","hora_fin":"19:40","materia":"Tutoría I","profesor":"Díaz Somera Miriam"},{"grupo":"1° A RAD","salon":"A22","dia":"Viernes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Socioemocional I","profesor":"Morales Vigueras Eduardo Adán"},{"grupo":"1° A RAD","salon":"A22","dia":"Viernes","hora_inicio":"15:20","hora_fin":"16:10","materia":"La materia y sus interacciones","profesor":"Angulo Jiménez Luis"},{"grupo":"1° A RAD","salon":"A22","dia":"Viernes","hora_inicio":"16:10","hora_fin":"17:00","materia":"La materia y sus interacciones","profesor":"Angulo Jiménez Luis"},{"grupo":"1° A RAD","salon":"A22","dia":"Viernes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Ingles I","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"1° A RAD","salon":"A22","dia":"Viernes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Ingles I","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"1º B RAD","salon":"A23","dia":"Lunes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Tutoría I","profesor":"Díaz Somera Miriam"},{"grupo":"1º B RAD","salon":"A23","dia":"Lunes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Tutoría I","profesor":"Díaz Somera Miriam"},{"grupo":"1º B RAD","salon":"A23","dia":"Lunes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Pensamiento I","profesor":"Silva Magaña Miguel Atl"},{"grupo":"1º B RAD","salon":"A23","dia":"Lunes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Pensamiento I","profesor":"Silva Magaña Miguel Atl"},{"grupo":"1º B RAD","salon":"A23","dia":"Lunes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1º B RAD","salon":"A23","dia":"Lunes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1º B RAD","salon":"A23","dia":"Lunes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Prope de Radiología","profesor":"Reyes Hernández Felipe Donaldo"},{"grupo":"1º B RAD","salon":"A23","dia":"Lunes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Prope de Radiología","profesor":"Reyes Hernández Felipe Donaldo"},{"grupo":"1º B RAD","salon":"A23","dia":"Martes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Lengua I","profesor":"Rodríguez Butanda María de la Cruz"},{"grupo":"1º B RAD","salon":"A23","dia":"Martes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Lengua I","profesor":"Rodríguez Butanda María de la Cruz"},{"grupo":"1º B RAD","salon":"A23","dia":"Martes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1º B RAD","salon":"A23","dia":"Martes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1º B RAD","salon":"A23","dia":"Martes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Pensamiento I","profesor":"Silva Magaña Miguel Atl"},{"grupo":"1º B RAD","salon":"A23","dia":"Martes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Pensamiento I","profesor":"Silva Magaña Miguel Atl"},{"grupo":"1º B RAD","salon":"A23","dia":"Miércoles","hora_inicio":"15:20","hora_fin":"16:10","materia":"La materia y sus interacciones","profesor":"Angulo Jiménez Luis"},{"grupo":"1º B RAD","salon":"A23","dia":"Miércoles","hora_inicio":"16:10","hora_fin":"17:00","materia":"La materia y sus interacciones","profesor":"Angulo Jiménez Luis"},{"grupo":"1º B RAD","salon":"A23","dia":"Miércoles","hora_inicio":"17:00","hora_fin":"17:50","materia":"Lengua I","profesor":"Rodríguez Butanda María de la Cruz"},{"grupo":"1º B RAD","salon":"A23","dia":"Miércoles","hora_inicio":"18:10","hora_fin":"18:55","materia":"Ciencias Sociales I","profesor":"Lazcano Campos José de Jesús"},{"grupo":"1º B RAD","salon":"A23","dia":"Miércoles","hora_inicio":"18:55","hora_fin":"19:40","materia":"Ciencias Sociales I","profesor":"Lazcano Campos José de Jesús"},{"grupo":"1º B RAD","salon":"A23","dia":"Jueves","hora_inicio":"15:20","hora_fin":"16:10","materia":"Socioemocional I","profesor":"Morales Vigueras Eduardo Adán"},{"grupo":"1º B RAD","salon":"A23","dia":"Jueves","hora_inicio":"16:10","hora_fin":"17:00","materia":"Ingles I","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"1º B RAD","salon":"A23","dia":"Jueves","hora_inicio":"17:00","hora_fin":"17:50","materia":"Ingles I","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"1º B RAD","salon":"A23","dia":"Jueves","hora_inicio":"18:10","hora_fin":"18:55","materia":"Prope de Radiología","profesor":"Reyes Hernández Felipe Donaldo"},{"grupo":"1º B RAD","salon":"A23","dia":"Jueves","hora_inicio":"18:55","hora_fin":"19:40","materia":"Prope de Radiología","profesor":"Reyes Hernández Felipe Donaldo"},{"grupo":"1º B RAD","salon":"A23","dia":"Jueves","hora_inicio":"19:40","hora_fin":"20:25","materia":"Cultura Digital I","profesor":"Mirón Valencia Pedro Ernesto"},{"grupo":"1º B RAD","salon":"A23","dia":"Viernes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Cultura Digital I","profesor":"Mirón Valencia Pedro Ernesto"},{"grupo":"1º B RAD","salon":"A23","dia":"Viernes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Cultura Digital I","profesor":"Mirón Valencia Pedro Ernesto"},{"grupo":"1º B RAD","salon":"A23","dia":"Viernes","hora_inicio":"18:10","hora_fin":"18:55","materia":"La materia y sus interacciones","profesor":"Angulo Jiménez Luis"},{"grupo":"1º B RAD","salon":"A23","dia":"Viernes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Ingles I","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"1º B RAD","salon":"A23","dia":"Viernes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Prope de Radiología","profesor":"Reyes Hernández Felipe Donaldo"},{"grupo":"1º B RAD","salon":"A23","dia":"Viernes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Prope de Radiología","profesor":"Reyes Hernández Felipe Donaldo"},{"grupo":"1° C RAD","salon":"A21","dia":"Lunes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Ingles I","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"1° C RAD","salon":"A21","dia":"Lunes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Cultura Digital I","profesor":"Mirón Valencia Pedro Ernesto"},{"grupo":"1° C RAD","salon":"A21","dia":"Lunes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Cultura Digital I","profesor":"Mirón Valencia Pedro Ernesto"},{"grupo":"1° C RAD","salon":"A21","dia":"Lunes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Prope de Radiología","profesor":"Reyes Hernández Felipe Donaldo"},{"grupo":"1° C RAD","salon":"A21","dia":"Lunes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Prope de Radiología","profesor":"Reyes Hernández Felipe Donaldo"},{"grupo":"1° C RAD","salon":"A21","dia":"Martes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Socioemocional I","profesor":"Morales Vigueras Eduardo Adán"},{"grupo":"1° C RAD","salon":"A21","dia":"Martes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Pensamiento I","profesor":"López Fernández Israel Baruc"},{"grupo":"1° C RAD","salon":"A21","dia":"Martes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Lengua I","profesor":"Rodríguez Butanda María de la Cruz"},{"grupo":"1° C RAD","salon":"A21","dia":"Martes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Lengua I","profesor":"Rodríguez Butanda María de la Cruz"},{"grupo":"1° C RAD","salon":"A21","dia":"Martes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Tutoría I","profesor":"Lazcano Campos José de Jesús"},{"grupo":"1° C RAD","salon":"A21","dia":"Martes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Tutoría I","profesor":"Lazcano Campos José de Jesús"},{"grupo":"1° C RAD","salon":"A21","dia":"Miércoles","hora_inicio":"14:30","hora_fin":"15:20","materia":"Prope de Radiología","profesor":"Reyes Hernández Felipe Donaldo"},{"grupo":"1° C RAD","salon":"A21","dia":"Miércoles","hora_inicio":"15:20","hora_fin":"16:10","materia":"Prope de Radiología","profesor":"Reyes Hernández Felipe Donaldo"},{"grupo":"1° C RAD","salon":"A21","dia":"Miércoles","hora_inicio":"16:10","hora_fin":"17:00","materia":"Ingles I","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"1° C RAD","salon":"A21","dia":"Miércoles","hora_inicio":"17:00","hora_fin":"17:50","materia":"La materia y sus interacciones","profesor":"Angulo Jiménez Luis"},{"grupo":"1° C RAD","salon":"A21","dia":"Miércoles","hora_inicio":"18:10","hora_fin":"18:55","materia":"La materia y sus interacciones","profesor":"Angulo Jiménez Luis"},{"grupo":"1° C RAD","salon":"A21","dia":"Miércoles","hora_inicio":"18:55","hora_fin":"19:40","materia":"Pensamiento I","profesor":"López Fernández Israel Baruc"},{"grupo":"1° C RAD","salon":"A21","dia":"Miércoles","hora_inicio":"19:40","hora_fin":"20:25","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1° C RAD","salon":"A21","dia":"Miércoles","hora_inicio":"20:25","hora_fin":"21:10","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1° C RAD","salon":"A21","dia":"Jueves","hora_inicio":"15:20","hora_fin":"16:10","materia":"Cultura Digital I","profesor":"Mirón Valencia Pedro Ernesto"},{"grupo":"1° C RAD","salon":"A21","dia":"Jueves","hora_inicio":"16:10","hora_fin":"17:00","materia":"Ciencias Sociales I","profesor":"Lazcano Campos José de Jesús"},{"grupo":"1° C RAD","salon":"A21","dia":"Jueves","hora_inicio":"17:00","hora_fin":"17:50","materia":"Ciencias Sociales I","profesor":"Lazcano Campos José de Jesús"},{"grupo":"1° C RAD","salon":"A21","dia":"Jueves","hora_inicio":"18:10","hora_fin":"18:55","materia":"Pensamiento I","profesor":"López Fernández Israel Baruc"},{"grupo":"1° C RAD","salon":"A21","dia":"Jueves","hora_inicio":"18:55","hora_fin":"19:40","materia":"Pensamiento I","profesor":"López Fernández Israel Baruc"},{"grupo":"1° C RAD","salon":"A21","dia":"Jueves","hora_inicio":"19:40","hora_fin":"20:25","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1° C RAD","salon":"A21","dia":"Jueves","hora_inicio":"20:25","hora_fin":"21:10","materia":"Humanidades I","profesor":"Nava Caballero Eduardo"},{"grupo":"1° C RAD","salon":"A21","dia":"Viernes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Ingles I","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"1° C RAD","salon":"A21","dia":"Viernes","hora_inicio":"18:10","hora_fin":"18:55","materia":"La materia y sus interacciones","profesor":"Angulo Jiménez Luis"},{"grupo":"1° C RAD","salon":"A21","dia":"Viernes","hora_inicio":"18:55","hora_fin":"19:40","materia":"La materia y sus interacciones","profesor":"Angulo Jiménez Luis"},{"grupo":"1° C RAD","salon":"A21","dia":"Viernes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Lengua I","profesor":"Rodríguez Butanda María de la Cruz"},{"grupo":"1° C RAD","salon":"A21","dia":"Viernes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Prope de Radiología","profesor":"Reyes Hernández Felipe Donaldo"},
-       {"grupo":"3º A Enf","salon":"A19","dia":"Lunes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Lengua III","profesor":"González Sierra Griselda"},{"grupo":"3º A Enf","salon":"A19","dia":"Lunes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Ecosistemas","profesor":"Orozco Colin Asunción"},{"grupo":"3º A Enf","salon":"A19","dia":"Lunes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Ecosistemas","profesor":"Orozco Colin Asunción"},{"grupo":"3º A Enf","salon":"A19","dia":"Lunes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Procedimientos baja y mediana complejidad","profesor":"Juárez Santiago Verónica"},{"grupo":"3º A Enf","salon":"A19","dia":"Lunes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Procedimientos baja y mediana complejidad","profesor":"Juárez Santiago Verónica"},{"grupo":"3º A Enf","salon":"A19","dia":"Lunes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Procedimientos baja y mediana complejidad","profesor":"Juárez Santiago Verónica"},{"grupo":"3º A Enf","salon":"A19","dia":"Lunes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Procedimientos baja y mediana complejidad","profesor":"Juárez Santiago Verónica"},{"grupo":"3º A Enf","salon":"A19","dia":"Martes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Ecosistemas","profesor":"Orozco Colin Asunción"},{"grupo":"3º A Enf","salon":"A19","dia":"Martes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Ecosistemas","profesor":"Orozco Colin Asunción"},{"grupo":"3º A Enf","salon":"A19","dia":"Martes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Pensamiento III","profesor":"Vázquez Pérez José Salomón"},{"grupo":"3º A Enf","salon":"A19","dia":"Martes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Pensamiento III","profesor":"Vázquez Pérez José Salomón"},{"grupo":"3º A Enf","salon":"A19","dia":"Martes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Patología y farmaco","profesor":"Guerrero Vera Carlos"},{"grupo":"3º A Enf","salon":"A19","dia":"Martes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Patología y farmaco","profesor":"Guerrero Vera Carlos"},{"grupo":"3º A Enf","salon":"A19","dia":"Martes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Humanidades II","profesor":"Díaz Somera Miriam"},{"grupo":"3º A Enf","salon":"A19","dia":"Martes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Humanidades II","profesor":"Díaz Somera Miriam"},{"grupo":"3º A Enf","salon":"A19","dia":"Miércoles","hora_inicio":"14:30","hora_fin":"15:20","materia":"Pensamiento III","profesor":"Vázquez Pérez José Salomón"},{"grupo":"3º A Enf","salon":"A19","dia":"Miércoles","hora_inicio":"15:20","hora_fin":"16:10","materia":"Pensamiento III","profesor":"Vázquez Pérez José Salomón"},{"grupo":"3º A Enf","salon":"A19","dia":"Miércoles","hora_inicio":"16:10","hora_fin":"17:00","materia":"Ingles III","profesor":"Tinoco Mendoza Ana Maria"},{"grupo":"3º A Enf","salon":"A19","dia":"Miércoles","hora_inicio":"17:00","hora_fin":"17:50","materia":"Tutoría III","profesor":"Olvera Jiménez María Lina"},{"grupo":"3º A Enf","salon":"A19","dia":"Miércoles","hora_inicio":"18:10","hora_fin":"18:55","materia":"Tutoría III","profesor":"Olvera Jiménez María Lina"},{"grupo":"3º A Enf","salon":"A19","dia":"Miércoles","hora_inicio":"18:55","hora_fin":"19:40","materia":"Patología y farmaco","profesor":"Guerrero Vera Carlos"},{"grupo":"3º A Enf","salon":"A19","dia":"Miércoles","hora_inicio":"19:40","hora_fin":"20:25","materia":"Patología y farmaco","profesor":"Guerrero Vera Carlos"},{"grupo":"3º A Enf","salon":"A19","dia":"Miércoles","hora_inicio":"20:25","hora_fin":"21:10","materia":"Humanidades II","profesor":"Díaz Somera Miriam"},{"grupo":"3º A Enf","salon":"A19","dia":"Jueves","hora_inicio":"14:30","hora_fin":"15:20","materia":"Ingles III","profesor":"Tinoco Mendoza Ana Maria"},{"grupo":"3º A Enf","salon":"A19","dia":"Jueves","hora_inicio":"15:20","hora_fin":"16:10","materia":"Ingles III","profesor":"Tinoco Mendoza Ana Maria"},{"grupo":"3º A Enf","salon":"A19","dia":"Jueves","hora_inicio":"16:10","hora_fin":"17:00","materia":"Lengua III","profesor":"González Sierra Griselda"},{"grupo":"3º A Enf","salon":"A19","dia":"Jueves","hora_inicio":"17:00","hora_fin":"17:50","materia":"Lengua III","profesor":"González Sierra Griselda"},{"grupo":"3º A Enf","salon":"A19","dia":"Jueves","hora_inicio":"18:10","hora_fin":"18:55","materia":"Patología y farmaco","profesor":"Guerrero Vera Carlos"},{"grupo":"3º A Enf","salon":"A19","dia":"Jueves","hora_inicio":"18:55","hora_fin":"19:40","materia":"Patología y farmaco","profesor":"Guerrero Vera Carlos"},{"grupo":"3º A Enf","salon":"A19","dia":"Jueves","hora_inicio":"19:40","hora_fin":"20:25","materia":"Humanidades II","profesor":"Díaz Somera Miriam"},{"grupo":"3º A Enf","salon":"A19","dia":"Jueves","hora_inicio":"20:25","hora_fin":"21:10","materia":"Humanidades II","profesor":"Díaz Somera Miriam"},{"grupo":"3º A Enf","salon":"A19","dia":"Viernes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Procedimientos baja y mediana complejidad","profesor":"Juárez Santiago Verónica"},{"grupo":"3º A Enf","salon":"A19","dia":"Viernes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Procedimientos baja y mediana complejidad","profesor":"Juárez Santiago Verónica"},{"grupo":"3º A Enf","salon":"A19","dia":"Viernes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Procedimientos baja y mediana complejidad","profesor":"Juárez Santiago Verónica"},{"grupo":"3º A Enf","salon":"A19","dia":"Viernes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Procedimientos baja y mediana complejidad","profesor":"Juárez Santiago Verónica"},{"grupo":"3º A Enf","salon":"A19","dia":"Viernes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Socioemocionales III","profesor":"Deveaux Gutiérrez José Juan Carlos"},{"grupo":"3º A Enf","salon":"A19","dia":"Viernes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Patología y farmaco","profesor":"Guerrero Vera Carlos"},{"grupo":"3º A Enf","salon":"A19","dia":"Viernes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Patología y farmaco","profesor":"Guerrero Vera Carlos"},{"grupo":"3º B Enf","salon":"A20","dia":"Lunes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Pensamiento III","profesor":"Vázquez Pérez José Salomón"},{"grupo":"3º B Enf","salon":"A20","dia":"Lunes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Pensamiento III","profesor":"Vázquez Pérez José Salomón"},{"grupo":"3º B Enf","salon":"A20","dia":"Lunes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Lengua III","profesor":"González Sierra Griselda"},{"grupo":"3º B Enf","salon":"A20","dia":"Lunes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Lengua III","profesor":"González Sierra Griselda"},{"grupo":"3º B Enf","salon":"A20","dia":"Lunes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Tutoría III","profesor":"González Sierra Griselda"},{"grupo":"3º B Enf","salon":"A20","dia":"Lunes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Patología y farmaco","profesor":"González Reyes Manuel"},{"grupo":"3º B Enf","salon":"A20","dia":"Lunes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Patología y farmaco","profesor":"González Reyes Manuel"},{"grupo":"3º B Enf","salon":"A20","dia":"Lunes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Patología y farmaco","profesor":"González Reyes Manuel"},{"grupo":"3º B Enf","salon":"A20","dia":"Martes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Ingles III","profesor":"Tinoco Mendoza Ana Maria"},{"grupo":"3º B Enf","salon":"A20","dia":"Martes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Ingles III","profesor":"Tinoco Mendoza Ana Maria"},{"grupo":"3º B Enf","salon":"A20","dia":"Martes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Lengua III","profesor":"González Sierra Griselda"},{"grupo":"3º B Enf","salon":"A20","dia":"Martes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Tutoría III","profesor":"González Sierra Griselda"},{"grupo":"3º B Enf","salon":"A20","dia":"Miércoles","hora_inicio":"14:30","hora_fin":"15:20","materia":"Procedimientos baja y mediana complejidad","profesor":"Juárez Santiago Verónica"},{"grupo":"3º B Enf","salon":"A20","dia":"Miércoles","hora_inicio":"15:20","hora_fin":"16:10","materia":"Procedimientos baja y mediana complejidad","profesor":"Juárez Santiago Verónica"},{"grupo":"3º B Enf","salon":"A20","dia":"Miércoles","hora_inicio":"16:10","hora_fin":"17:00","materia":"Procedimientos baja y mediana complejidad","profesor":"Juárez Santiago Verónica"},{"grupo":"3º B Enf","salon":"A20","dia":"Miércoles","hora_inicio":"17:00","hora_fin":"17:50","materia":"Procedimientos baja y mediana complejidad","profesor":"Juárez Santiago Verónica"},{"grupo":"3º B Enf","salon":"A20","dia":"Jueves","hora_inicio":"15:20","hora_fin":"16:10","materia":"Socioemocionales III","profesor":"Deveaux Gutiérrez José Juan Carlos"},{"grupo":"3º B Enf","salon":"A20","dia":"Jueves","hora_inicio":"16:10","hora_fin":"17:00","materia":"Humanidades II","profesor":"Díaz Somera Miriam"},{"grupo":"3º B Enf","salon":"A20","dia":"Jueves","hora_inicio":"17:00","hora_fin":"17:50","materia":"Humanidades II","profesor":"Díaz Somera Miriam"},{"grupo":"3º B Enf","salon":"A20","dia":"Jueves","hora_inicio":"18:10","hora_fin":"18:55","materia":"Patología y farmaco","profesor":"González Reyes Manuel"},{"grupo":"3º B Enf","salon":"A20","dia":"Jueves","hora_inicio":"18:55","hora_fin":"19:40","materia":"Patología y farmaco","profesor":"González Reyes Manuel"},{"grupo":"3º B Enf","salon":"A20","dia":"Viernes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Ecosistemas","profesor":"Zambrano González Sigfrido"},{"grupo":"3º B Enf","salon":"A20","dia":"Viernes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Ecosistemas","profesor":"Zambrano González Sigfrido"},{"grupo":"3º B Enf","salon":"A20","dia":"Viernes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Ingles III","profesor":"Tinoco Mendoza Ana Maria"},{"grupo":"3º B Enf","salon":"A20","dia":"Viernes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Pensamiento III","profesor":"Vázquez Pérez José Salomón"},{"grupo":"3° C Enf","salon":"A9","dia":"Lunes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Patología y farmaco","profesor":"González Reyes Manuel"},{"grupo":"3° C Enf","salon":"A9","dia":"Lunes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Patología y farmaco","profesor":"González Reyes Manuel"},{"grupo":"3° C Enf","salon":"A9","dia":"Lunes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Patología y farmaco","profesor":"González Reyes Manuel"},{"grupo":"3° C Enf","salon":"A9","dia":"Lunes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Lengua III","profesor":"Rodríguez Butanda María de la Cruz"},{"grupo":"3° C Enf","salon":"A9","dia":"Lunes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Ecosistemas","profesor":"Orozco Colin Asunción"},{"grupo":"3° C Enf","salon":"A9","dia":"Lunes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Ecosistemas","profesor":"Orozco Colin Asunción"},{"grupo":"3° C Enf","salon":"A9","dia":"Lunes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Humanidades II","profesor":"Díaz Somera Miriam"},{"grupo":"3° C Enf","salon":"A9","dia":"Lunes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Humanidades II","profesor":"Díaz Somera Miriam"},{"grupo":"3° C Enf","salon":"A9","dia":"Martes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Pensamiento III","profesor":"Vázquez Pérez José Salomón"},{"grupo":"3° C Enf","salon":"A9","dia":"Martes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Pensamiento III","profesor":"Vázquez Pérez José Salomón"},{"grupo":"3° C Enf","salon":"A9","dia":"Martes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Patología y farmaco","profesor":"González Reyes Manuel"},{"grupo":"3° C Enf","salon":"A9","dia":"Martes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Patología y farmaco","profesor":"González Reyes Manuel"},{"grupo":"3° C Enf","salon":"A9","dia":"Miércoles","hora_inicio":"14:30","hora_fin":"15:20","materia":"Ingles III","profesor":"Tinoco Mendoza Ana Maria"},{"grupo":"3° C Enf","salon":"A9","dia":"Miércoles","hora_inicio":"15:20","hora_fin":"16:10","materia":"Ingles III","profesor":"Tinoco Mendoza Ana Maria"},{"grupo":"3° C Enf","salon":"A9","dia":"Miércoles","hora_inicio":"16:10","hora_fin":"17:00","materia":"Ecosistemas","profesor":"Orozco Colin Asunción"},{"grupo":"3° C Enf","salon":"A9","dia":"Miércoles","hora_inicio":"17:00","hora_fin":"17:50","materia":"Ecosistemas","profesor":"Orozco Colin Asunción"},{"grupo":"3° C Enf","salon":"A9","dia":"Miércoles","hora_inicio":"18:10","hora_fin":"18:55","materia":"Procedimientos baja y mediana complejidad","profesor":"Juárez Santiago Verónica"},{"grupo":"3° C Enf","salon":"A9","dia":"Miércoles","hora_inicio":"18:55","hora_fin":"19:40","materia":"Procedimientos baja y mediana complejidad","profesor":"Juárez Santiago Verónica"},{"grupo":"3° C Enf","salon":"A9","dia":"Miércoles","hora_inicio":"19:40","hora_fin":"20:25","materia":"Procedimientos baja y mediana complejidad","profesor":"Juárez Santiago Verónica"},{"grupo":"3° C Enf","salon":"A9","dia":"Miércoles","hora_inicio":"20:25","hora_fin":"21:10","materia":"Procedimientos baja y mediana complejidad","profesor":"Juárez Santiago Verónica"},{"grupo":"3° C Enf","salon":"A9","dia":"Jueves","hora_inicio":"14:30","hora_fin":"15:20","materia":"Pensamiento III","profesor":"Vázquez Pérez José Salomón"},{"grupo":"3° C Enf","salon":"A9","dia":"Jueves","hora_inicio":"15:20","hora_fin":"16:10","materia":"Pensamiento III","profesor":"Vázquez Pérez José Salomón"},{"grupo":"3° C Enf","salon":"A9","dia":"Jueves","hora_inicio":"17:00","hora_fin":"17:50","materia":"Socioemocionales III","profesor":"Deveaux Gutiérrez José Juan Carlos"},{"grupo":"3° C Enf","salon":"A9","dia":"Jueves","hora_inicio":"18:10","hora_fin":"18:55","materia":"Tutoría III","profesor":"Lazcano Campos José de Jesús"},{"grupo":"3° C Enf","salon":"A9","dia":"Jueves","hora_inicio":"18:55","hora_fin":"19:40","materia":"Tutoría III","profesor":"Lazcano Campos José de Jesús"},{"grupo":"3° C Enf","salon":"A9","dia":"Jueves","hora_inicio":"19:40","hora_fin":"20:25","materia":"Patología y farmaco","profesor":"González Reyes Manuel"},{"grupo":"3° C Enf","salon":"A9","dia":"Jueves","hora_inicio":"20:25","hora_fin":"21:10","materia":"Patología y farmaco","profesor":"González Reyes Manuel"},{"grupo":"3° C Enf","salon":"A9","dia":"Viernes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Patología y farmaco","profesor":"González Reyes Manuel"},{"grupo":"3° C Enf","salon":"A9","dia":"Viernes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Patología y farmaco","profesor":"González Reyes Manuel"},{"grupo":"3° C Enf","salon":"A9","dia":"Viernes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Procedimientos baja y mediana complejidad","profesor":"Juárez Santiago Verónica"},{"grupo":"3° C Enf","salon":"A9","dia":"Viernes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Procedimientos baja y mediana complejidad","profesor":"Juárez Santiago Verónica"},{"grupo":"3° D Enf","salon":"A10","dia":"Lunes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Ingles III","profesor":"Tinoco Mendoza Ana Maria"},{"grupo":"3° D Enf","salon":"A10","dia":"Lunes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Ingles III","profesor":"Tinoco Mendoza Ana Maria"},{"grupo":"3° D Enf","salon":"A10","dia":"Lunes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Pensamiento III","profesor":"Vázquez Pérez José Salomón"},{"grupo":"3° D Enf","salon":"A10","dia":"Lunes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Tutoría III","profesor":"Mendoza Hernandez Myriam Guadalupe"},{"grupo":"3° D Enf","salon":"A10","dia":"Lunes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Tutoría III","profesor":"Mendoza Hernandez Myriam Guadalupe"},{"grupo":"3° D Enf","salon":"A10","dia":"Lunes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Lengua III","profesor":"González Sierra Griselda"},{"grupo":"3° D Enf","salon":"A10","dia":"Lunes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Patología y farmaco","profesor":"Uribe Aguilar Alma Delia"},{"grupo":"3° D Enf","salon":"A10","dia":"Lunes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Patología y farmaco","profesor":"Uribe Aguilar Alma Delia"},{"grupo":"3° D Enf","salon":"A10","dia":"Martes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Procedimientos baja y mediana complejidad","profesor":"Juárez Santiago Verónica"},{"grupo":"3° D Enf","salon":"A10","dia":"Martes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Procedimientos baja y mediana complejidad","profesor":"Juárez Santiago Verónica"},{"grupo":"3° D Enf","salon":"A10","dia":"Martes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Procedimientos baja y mediana complejidad","profesor":"Juárez Santiago Verónica"},{"grupo":"3° D Enf","salon":"A10","dia":"Martes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Procedimientos baja y mediana complejidad","profesor":"Juárez Santiago Verónica"},{"grupo":"3° D Enf","salon":"A10","dia":"Miércoles","hora_inicio":"14:30","hora_fin":"15:20","materia":"Ecosistemas","profesor":"Orozco Colin Asunción"},{"grupo":"3° D Enf","salon":"A10","dia":"Miércoles","hora_inicio":"15:20","hora_fin":"16:10","materia":"Ecosistemas","profesor":"Orozco Colin Asunción"},{"grupo":"3° D Enf","salon":"A10","dia":"Miércoles","hora_inicio":"16:10","hora_fin":"17:00","materia":"Humanidades II","profesor":"Díaz Somera Miriam"},{"grupo":"3° D Enf","salon":"A10","dia":"Miércoles","hora_inicio":"17:00","hora_fin":"17:50","materia":"Humanidades II","profesor":"Díaz Somera Miriam"},{"grupo":"3° D Enf","salon":"A10","dia":"Miércoles","hora_inicio":"18:10","hora_fin":"18:55","materia":"Pensamiento III","profesor":"Vázquez Pérez José Salomón"},{"grupo":"3° D Enf","salon":"A10","dia":"Miércoles","hora_inicio":"18:55","hora_fin":"19:40","materia":"Socioemocionales III","profesor":"Deveaux Gutiérrez José Juan Carlos"},{"grupo":"3° D Enf","salon":"A10","dia":"Jueves","hora_inicio":"14:30","hora_fin":"15:20","materia":"Lengua III","profesor":"González Sierra Griselda"},{"grupo":"3° D Enf","salon":"A10","dia":"Jueves","hora_inicio":"15:20","hora_fin":"16:10","materia":"Lengua III","profesor":"González Sierra Griselda"},{"grupo":"3° D Enf","salon":"A10","dia":"Jueves","hora_inicio":"16:10","hora_fin":"17:00","materia":"Patología y farmaco","profesor":"Uribe Aguilar Alma Delia"},{"grupo":"3° D Enf","salon":"A10","dia":"Jueves","hora_inicio":"17:00","hora_fin":"17:50","materia":"Patología y farmaco","profesor":"Uribe Aguilar Alma Delia"},{"grupo":"3° D Enf","salon":"A10","dia":"Viernes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Pensamiento III","profesor":"Vázquez Pérez José Salomón"},{"grupo":"3° D Enf","salon":"A10","dia":"Viernes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Pensamiento III","profesor":"Vázquez Pérez José Salomón"},{"grupo":"3° D Enf","salon":"A10","dia":"Viernes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Humanidades II","profesor":"Díaz Somera Miriam"},{"grupo":"3° D Enf","salon":"A10","dia":"Viernes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Humanidades II","profesor":"Díaz Somera Miriam"},{"grupo":"3° D Enf","salon":"A10","dia":"Viernes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Patología y farmaco","profesor":"Uribe Aguilar Alma Delia"},{"grupo":"3° D Enf","salon":"A10","dia":"Viernes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Patología y farmaco","profesor":"Uribe Aguilar Alma Delia"},{"grupo":"3º E Enf","salon":"A11","dia":"Lunes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Ecosistemas","profesor":"Orozco Colin Asunción"},{"grupo":"3º E Enf","salon":"A11","dia":"Lunes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Ecosistemas","profesor":"Orozco Colin Asunción"},{"grupo":"3º E Enf","salon":"A11","dia":"Lunes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Ingles III","profesor":"Tinoco Mendoza Ana Maria"},{"grupo":"3º E Enf","salon":"A11","dia":"Lunes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Socioemocionales III","profesor":"Deveaux Gutiérrez José Juan Carlos"},{"grupo":"3º E Enf","salon":"A11","dia":"Lunes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Patología y farmaco","profesor":"Uribe Aguilar Alma Delia"},{"grupo":"3º E Enf","salon":"A11","dia":"Lunes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Patología y farmaco","profesor":"Uribe Aguilar Alma Delia"},{"grupo":"3º E Enf","salon":"A11","dia":"Lunes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Lengua III","profesor":"González Sierra Griselda"},{"grupo":"3º E Enf","salon":"A11","dia":"Lunes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Lengua III","profesor":"González Sierra Griselda"},{"grupo":"3º E Enf","salon":"A11","dia":"Martes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Humanidades II","profesor":"Díaz Somera Miriam"},{"grupo":"3º E Enf","salon":"A11","dia":"Martes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Humanidades II","profesor":"Díaz Somera Miriam"},{"grupo":"3º E Enf","salon":"A11","dia":"Martes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Ingles III","profesor":"Tinoco Mendoza Ana Maria"},{"grupo":"3º E Enf","salon":"A11","dia":"Martes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Pensamiento III","profesor":"Castañeda Mendoza Elizabeth"},{"grupo":"3º E Enf","salon":"A11","dia":"Miércoles","hora_inicio":"14:30","hora_fin":"15:20","materia":"Humanidades II","profesor":"Díaz Somera Miriam"},{"grupo":"3º E Enf","salon":"A11","dia":"Miércoles","hora_inicio":"15:20","hora_fin":"16:10","materia":"Humanidades II","profesor":"Díaz Somera Miriam"},{"grupo":"3º E Enf","salon":"A11","dia":"Miércoles","hora_inicio":"16:10","hora_fin":"17:00","materia":"Pensamiento III","profesor":"Castañeda Mendoza Elizabeth"},{"grupo":"3º E Enf","salon":"A11","dia":"Miércoles","hora_inicio":"17:00","hora_fin":"17:50","materia":"Pensamiento III","profesor":"Castañeda Mendoza Elizabeth"},{"grupo":"3º E Enf","salon":"A11","dia":"Miércoles","hora_inicio":"18:10","hora_fin":"18:55","materia":"Procedimientos baja y mediana complejidad","profesor":"Mendoza Hernandez Myriam Guadalupe"},{"grupo":"3º E Enf","salon":"A11","dia":"Miércoles","hora_inicio":"18:55","hora_fin":"19:40","materia":"Procedimientos baja y mediana complejidad","profesor":"Mendoza Hernandez Myriam Guadalupe"},{"grupo":"3º E Enf","salon":"A11","dia":"Miércoles","hora_inicio":"19:40","hora_fin":"20:25","materia":"Procedimientos baja y mediana complejidad","profesor":"Mendoza Hernandez Myriam Guadalupe"},{"grupo":"3º E Enf","salon":"A11","dia":"Jueves","hora_inicio":"14:30","hora_fin":"15:20","materia":"Tutoría III","profesor":"Mendoza Hernandez Myriam Guadalupe"},{"grupo":"3º E Enf","salon":"A11","dia":"Jueves","hora_inicio":"15:20","hora_fin":"16:10","materia":"Tutoría III","profesor":"Mendoza Hernandez Myriam Guadalupe"},{"grupo":"3º E Enf","salon":"A11","dia":"Jueves","hora_inicio":"16:10","hora_fin":"17:00","materia":"Ecosistemas","profesor":"Orozco Colin Asunción"},{"grupo":"3º E Enf","salon":"A11","dia":"Jueves","hora_inicio":"17:00","hora_fin":"17:50","materia":"Ecosistemas","profesor":"Orozco Colin Asunción"},{"grupo":"3º E Enf","salon":"A11","dia":"Viernes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Pensamiento III","profesor":"Castañeda Mendoza Elizabeth"},{"grupo":"3º E Enf","salon":"A11","dia":"Viernes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Ingles III","profesor":"Tinoco Mendoza Ana Maria"},{"grupo":"3º E Enf","salon":"A11","dia":"Viernes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Patología y farmaco","profesor":"Uribe Aguilar Alma Delia"},{"grupo":"3º E Enf","salon":"A11","dia":"Viernes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Patología y farmaco","profesor":"Uribe Aguilar Alma Delia"},{"grupo":"3° A Rad","salon":"A12","dia":"Lunes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Ecosistemas","profesor":"Zambrano González Sigfrido"},{"grupo":"3° A Rad","salon":"A12","dia":"Lunes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Ecosistemas","profesor":"Zambrano González Sigfrido"},{"grupo":"3° A Rad","salon":"A12","dia":"Lunes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Ingles III","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"3° A Rad","salon":"A12","dia":"Lunes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Ingles III","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"3° A Rad","salon":"A12","dia":"Lunes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Produce imagenes de estudios simples","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"3° A Rad","salon":"A12","dia":"Lunes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Produce imagenes de estudios simples","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"3° A Rad","salon":"A12","dia":"Lunes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Produce imagenes de estudios simples","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"3º B Rad","salon":"A13","dia":"Lunes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Tutoría III","profesor":"Pérez Barbarena Héctor"},{"grupo":"3º B Rad","salon":"A13","dia":"Lunes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Ingles III","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"3º B Rad","salon":"A13","dia":"Lunes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Lengua III","profesor":"Rodríguez Butanda María de la Cruz"},{"grupo":"3º B Rad","salon":"A13","dia":"Lunes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Produce imagenes de estudios simples","profesor":"Martínez Martínez David"},{"grupo":"3º B Rad","salon":"A13","dia":"Lunes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Produce imagenes de estudios simples","profesor":"Martínez Martínez David"},{"grupo":"3º B Rad","salon":"A13","dia":"Lunes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Socioemocionales III","profesor":"Deveaux Gutiérrez José Juan Carlos"},{"grupo":"3º B Rad","salon":"A13","dia":"Lunes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Estudios radiograficos simples","profesor":"Vela Dos Santos Ruve"},{"grupo":"3º B Rad","salon":"A13","dia":"Lunes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Estudios radiograficos simples","profesor":"Vela Dos Santos Ruve"},{"grupo":"3º B Rad","salon":"A13","dia":"Martes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Estudios radiograficos simples","profesor":"Vela Dos Santos Ruve"},{"grupo":"3º B Rad","salon":"A13","dia":"Martes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Estudios radiograficos simples","profesor":"Vela Dos Santos Ruve"},{"grupo":"3º B Rad","salon":"A13","dia":"Martes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Ecosistemas","profesor":"Zambrano González Sigfrido"},{"grupo":"3º B Rad","salon":"A13","dia":"Martes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Ecosistemas","profesor":"Zambrano González Sigfrido"},{"grupo":"3° C Rad","salon":"A6","dia":"Lunes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Estudios radiograficos simples","profesor":"Vela Dos Santos Ruve"},{"grupo":"3° C Rad","salon":"A6","dia":"Lunes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Estudios radiograficos simples","profesor":"Vela Dos Santos Ruve"},{"grupo":"3° C Rad","salon":"A6","dia":"Lunes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Ecosistemas","profesor":"Zambrano González Sigfrido"},{"grupo":"3° C Rad","salon":"A6","dia":"Lunes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Ecosistemas","profesor":"Zambrano González Sigfrido"},{"grupo":"3° C Rad","salon":"A6","dia":"Lunes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Humanidades II","profesor":"Díaz Somera Miriam"},{"grupo":"3° C Rad","salon":"A6","dia":"Lunes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Humanidades II","profesor":"Díaz Somera Miriam"},{"grupo":"3° C Rad","salon":"A6","dia":"Lunes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Pensamiento III","profesor":"Castañeda Mendoza Elizabeth"},{"grupo":"3° C Rad","salon":"A6","dia":"Lunes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Pensamiento III","profesor":"Castañeda Mendoza Elizabeth"},{"grupo":"3° C Rad","salon":"A6","dia":"Martes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Lengua III","profesor":"González Sierra Griselda"},{"grupo":"3° C Rad","salon":"A6","dia":"Martes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Lengua III","profesor":"González Sierra Griselda"},{"grupo":"3° C Rad","salon":"A6","dia":"Martes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Humanidades II","profesor":"Díaz Somera Miriam"},{"grupo":"3° C Rad","salon":"A6","dia":"Martes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Humanidades II","profesor":"Díaz Somera Miriam"},{"grupo":"3° A Rad","salon":"A12","dia":"Martes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Lengua III","profesor":"Rodríguez Butanda María de la Cruz"},{"grupo":"3° A Rad","salon":"A12","dia":"Martes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Lengua III","profesor":"Rodríguez Butanda María de la Cruz"},{"grupo":"3° A Rad","salon":"A12","dia":"Martes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Tutoría III","profesor":"Pérez Fajardo Marco Antonio"},{"grupo":"3° A Rad","salon":"A12","dia":"Martes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Tutoría III","profesor":"Pérez Fajardo Marco Antonio"},{"grupo":"3° A Rad","salon":"A12","dia":"Miércoles","hora_inicio":"14:30","hora_fin":"15:20","materia":"Humanidades II","profesor":"Deveaux Gutiérrez José Juan Carlos"},{"grupo":"3° A Rad","salon":"A12","dia":"Miércoles","hora_inicio":"15:20","hora_fin":"16:10","materia":"Humanidades II","profesor":"Deveaux Gutiérrez José Juan Carlos"},{"grupo":"3° A Rad","salon":"A12","dia":"Miércoles","hora_inicio":"16:10","hora_fin":"17:00","materia":"Lengua III","profesor":"Rodríguez Butanda María de la Cruz"},{"grupo":"3° A Rad","salon":"A12","dia":"Miércoles","hora_inicio":"17:00","hora_fin":"17:50","materia":"Ecosistemas","profesor":"Zambrano González Sigfrido"},{"grupo":"3º B Rad","salon":"A13","dia":"Martes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Lengua III","profesor":"Rodríguez Butanda María de la Cruz"},{"grupo":"3º B Rad","salon":"A13","dia":"Martes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Pensamiento III","profesor":"Castañeda Mendoza Elizabeth"},{"grupo":"3º B Rad","salon":"A13","dia":"Martes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Pensamiento III","profesor":"Castañeda Mendoza Elizabeth"},{"grupo":"3º B Rad","salon":"A13","dia":"Miércoles","hora_inicio":"14:30","hora_fin":"15:20","materia":"Ecosistemas","profesor":"Zambrano González Sigfrido"},{"grupo":"3º B Rad","salon":"A13","dia":"Miércoles","hora_inicio":"15:20","hora_fin":"16:10","materia":"Ecosistemas","profesor":"Zambrano González Sigfrido"},{"grupo":"3º B Rad","salon":"A13","dia":"Miércoles","hora_inicio":"16:10","hora_fin":"17:00","materia":"Humanidades II","profesor":"Deveaux Gutiérrez José Juan Carlos"},{"grupo":"3º B Rad","salon":"A13","dia":"Miércoles","hora_inicio":"17:00","hora_fin":"17:50","materia":"Humanidades II","profesor":"Deveaux Gutiérrez José Juan Carlos"},{"grupo":"3° A Rad","salon":"A12","dia":"Miércoles","hora_inicio":"18:10","hora_fin":"18:55","materia":"Ecosistemas","profesor":"Zambrano González Sigfrido"},{"grupo":"3° A Rad","salon":"A12","dia":"Miércoles","hora_inicio":"18:55","hora_fin":"19:40","materia":"Produce imagenes de estudios simples","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"3° A Rad","salon":"A12","dia":"Miércoles","hora_inicio":"19:40","hora_fin":"20:25","materia":"Produce imagenes de estudios simples","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"3° A Rad","salon":"A12","dia":"Miércoles","hora_inicio":"20:25","hora_fin":"21:10","materia":"Estudios radiograficos simples","profesor":"Vela Dos Santos Ruve"},{"grupo":"3° C Rad","salon":"A6","dia":"Martes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Estudios radiograficos simples","profesor":"Vela Dos Santos Ruve"},{"grupo":"3° C Rad","salon":"A6","dia":"Martes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Estudios radiograficos simples","profesor":"Vela Dos Santos Ruve"},{"grupo":"3° C Rad","salon":"A6","dia":"Martes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Ingles III","profesor":"Sin profesor"},{"grupo":"3° C Rad","salon":"A6","dia":"Martes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Ingles III","profesor":"Sin profesor"},{"grupo":"3º B Rad","salon":"A13","dia":"Jueves","hora_inicio":"16:10","hora_fin":"17:00","materia":"Estudios radiograficos simples","profesor":"Vela Dos Santos Ruve"},{"grupo":"3º B Rad","salon":"A13","dia":"Jueves","hora_inicio":"17:00","hora_fin":"17:50","materia":"Estudios radiograficos simples","profesor":"Vela Dos Santos Ruve"},{"grupo":"3° A Rad","salon":"A12","dia":"Jueves","hora_inicio":"14:30","hora_fin":"15:20","materia":"Estudios radiograficos simples","profesor":"Vela Dos Santos Ruve"},{"grupo":"3° A Rad","salon":"A12","dia":"Jueves","hora_inicio":"15:20","hora_fin":"16:10","materia":"Estudios radiograficos simples","profesor":"Vela Dos Santos Ruve"},{"grupo":"3° A Rad","salon":"A12","dia":"Jueves","hora_inicio":"16:10","hora_fin":"17:00","materia":"Pensamiento III","profesor":"Castañeda Mendoza Elizabeth"},{"grupo":"3° A Rad","salon":"A12","dia":"Jueves","hora_inicio":"17:00","hora_fin":"17:50","materia":"Pensamiento III","profesor":"Castañeda Mendoza Elizabeth"},{"grupo":"3° C Rad","salon":"A6","dia":"Miércoles","hora_inicio":"14:30","hora_fin":"15:20","materia":"Produce imagenes de estudios simples","profesor":"Martínez Martínez David"},{"grupo":"3° C Rad","salon":"A6","dia":"Miércoles","hora_inicio":"15:20","hora_fin":"16:10","materia":"Produce imagenes de estudios simples","profesor":"Martínez Martínez David"},{"grupo":"3° C Rad","salon":"A6","dia":"Miércoles","hora_inicio":"16:10","hora_fin":"17:00","materia":"Produce imagenes de estudios simples","profesor":"Martínez Martínez David"},{"grupo":"3° C Rad","salon":"A6","dia":"Miércoles","hora_inicio":"17:00","hora_fin":"17:50","materia":"Produce imagenes de estudios simples","profesor":"Martínez Martínez David"},{"grupo":"3° C Rad","salon":"A6","dia":"Miércoles","hora_inicio":"18:10","hora_fin":"18:55","materia":"Estudios radiograficos simples","profesor":"Vela Dos Santos Ruve"},{"grupo":"3° C Rad","salon":"A6","dia":"Miércoles","hora_inicio":"18:55","hora_fin":"19:40","materia":"Ingles III","profesor":"Sin profesor"},{"grupo":"3° C Rad","salon":"A6","dia":"Miércoles","hora_inicio":"19:40","hora_fin":"20:25","materia":"Ingles III","profesor":"Sin profesor"},{"grupo":"3° C Rad","salon":"A6","dia":"Jueves","hora_inicio":"14:30","hora_fin":"15:20","materia":"Tutoría III","profesor":"González Reyes Manuel"},{"grupo":"3° C Rad","salon":"A6","dia":"Jueves","hora_inicio":"15:20","hora_fin":"16:10","materia":"Tutoría III","profesor":"González Reyes Manuel"},{"grupo":"3° C Rad","salon":"A6","dia":"Jueves","hora_inicio":"16:10","hora_fin":"17:00","materia":"Ecosistemas","profesor":"Zambrano González Sigfrido"},{"grupo":"3° C Rad","salon":"A6","dia":"Jueves","hora_inicio":"17:00","hora_fin":"17:50","materia":"Ecosistemas","profesor":"Zambrano González Sigfrido"},{"grupo":"3° C Rad","salon":"A6","dia":"Jueves","hora_inicio":"18:10","hora_fin":"18:55","materia":"Lengua III","profesor":"González Sierra Griselda"},{"grupo":"3° A Rad","salon":"A12","dia":"Jueves","hora_inicio":"18:10","hora_fin":"18:55","materia":"Socioemocionales III","profesor":"Deveaux Gutiérrez José Juan Carlos"},{"grupo":"3° A Rad","salon":"A12","dia":"Jueves","hora_inicio":"18:55","hora_fin":"19:40","materia":"Produce imagenes de estudios simples","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"3° A Rad","salon":"A12","dia":"Jueves","hora_inicio":"19:40","hora_fin":"20:25","materia":"Produce imagenes de estudios simples","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"3° A Rad","salon":"A12","dia":"Jueves","hora_inicio":"20:25","hora_fin":"21:10","materia":"Produce imagenes de estudios simples","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"3º B Rad","salon":"A13","dia":"Jueves","hora_inicio":"18:10","hora_fin":"18:55","materia":"Pensamiento III","profesor":"Castañeda Mendoza Elizabeth"},{"grupo":"3º B Rad","salon":"A13","dia":"Jueves","hora_inicio":"18:55","hora_fin":"19:40","materia":"Pensamiento III","profesor":"Castañeda Mendoza Elizabeth"},{"grupo":"3° A Rad","salon":"A12","dia":"Viernes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Produce imagenes de estudios simples","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"3° A Rad","salon":"A12","dia":"Viernes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Produce imagenes de estudios simples","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"3° A Rad","salon":"A12","dia":"Viernes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Pensamiento III","profesor":"Castañeda Mendoza Elizabeth"},{"grupo":"3° A Rad","salon":"A12","dia":"Viernes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Pensamiento III","profesor":"Castañeda Mendoza Elizabeth"},{"grupo":"3° C Rad","salon":"A6","dia":"Jueves","hora_inicio":"18:55","hora_fin":"19:40","materia":"Estudios radiograficos simples","profesor":"Vela Dos Santos Ruve"},{"grupo":"3° C Rad","salon":"A6","dia":"Jueves","hora_inicio":"19:40","hora_fin":"20:25","materia":"Estudios radiograficos simples","profesor":"Vela Dos Santos Ruve"},{"grupo":"3º B Rad","salon":"A13","dia":"Viernes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Humanidades II","profesor":"Deveaux Gutiérrez José Juan Carlos"},{"grupo":"3º B Rad","salon":"A13","dia":"Viernes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Humanidades II","profesor":"Deveaux Gutiérrez José Juan Carlos"},{"grupo":"3º B Rad","salon":"A13","dia":"Viernes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Estudios radiograficos simples","profesor":"Vela Dos Santos Ruve"},{"grupo":"3º B Rad","salon":"A13","dia":"Viernes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Estudios radiograficos simples","profesor":"Vela Dos Santos Ruve"},{"grupo":"3º B Rad","salon":"A13","dia":"Viernes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Tutoría III","profesor":"Pérez Barbarena Héctor"},{"grupo":"3º B Rad","salon":"A13","dia":"Viernes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Produce imagenes de estudios simples","profesor":"Martínez Martínez David"},{"grupo":"3º B Rad","salon":"A13","dia":"Viernes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Produce imagenes de estudios simples","profesor":"Martínez Martínez David"},{"grupo":"3º B Rad","salon":"A13","dia":"Viernes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Produce imagenes de estudios simples","profesor":"Martínez Martínez David"},{"grupo":"3° C Rad","salon":"A6","dia":"Viernes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Produce imagenes de estudios simples","profesor":"Martínez Martínez David"},{"grupo":"3° C Rad","salon":"A6","dia":"Viernes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Produce imagenes de estudios simples","profesor":"Martínez Martínez David"},{"grupo":"3° C Rad","salon":"A6","dia":"Viernes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Produce imagenes de estudios simples","profesor":"Martínez Martínez David"},{"grupo":"3° C Rad","salon":"A6","dia":"Viernes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Produce imagenes de estudios simples","profesor":"Martínez Martínez David"},{"grupo":"3° C Rad","salon":"A6","dia":"Viernes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Produce imagenes de estudios simples","profesor":"Martínez Martínez David"},{"grupo":"3° C Rad","salon":"A6","dia":"Viernes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Socioemocionales III","profesor":"Deveaux Gutiérrez José Juan Carlos"},{"grupo":"3° C Rad","salon":"A6","dia":"Viernes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Ecosistemas","profesor":"Zambrano González Sigfrido"},{"grupo":"3° C Rad","salon":"A6","dia":"Viernes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Ecosistemas","profesor":"Zambrano González Sigfrido"},
-        {"grupo":"5° A Enf","salon":"A1","dia":"Lunes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Temas selectos de matematicas II","profesor":"Castañeda Mendoza Elizabeth"},{"grupo":"5° A Enf","salon":"A1","dia":"Lunes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Temas selectos de matematicas II","profesor":"Castañeda Mendoza Elizabeth"},{"grupo":"5° A Enf","salon":"A1","dia":"Lunes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Temas selectos de matematicas II","profesor":"Castañeda Mendoza Elizabeth"},{"grupo":"5° A Enf","salon":"A1","dia":"Lunes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Seres Humanos: estructura y procesos","profesor":"Lizaola Díaz María Guadalupe"},{"grupo":"5° A Enf","salon":"A1","dia":"Lunes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Seres Humanos: estructura y procesos","profesor":"Lizaola Díaz María Guadalupe"},{"grupo":"5° A Enf","salon":"A1","dia":"Lunes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Seres Humanos: estructura y procesos","profesor":"Lizaola Díaz María Guadalupe"},{"grupo":"5° B Enf","salon":"A2","dia":"Lunes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Ingles V","profesor":"Flores Reyes Miguel Ángel"},{"grupo":"5° B Enf","salon":"A2","dia":"Lunes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Cuidado de la mujer","profesor":"Lizaola Díaz María Guadalupe"},{"grupo":"5° B Enf","salon":"A2","dia":"Lunes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Cuidado de la mujer","profesor":"Lizaola Díaz María Guadalupe"},{"grupo":"5° B Enf","salon":"A2","dia":"Lunes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Cuidado de la mujer","profesor":"Lizaola Díaz María Guadalupe"},{"grupo":"5° B Enf","salon":"A2","dia":"Lunes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Temas selectos de matematicas II","profesor":"Castañeda Mendoza Elizabeth"},{"grupo":"5° B Enf","salon":"A2","dia":"Lunes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Temas selectos de matematicas II","profesor":"Castañeda Mendoza Elizabeth"},{"grupo":"5° B Enf","salon":"A2","dia":"Lunes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Cuidado del niño","profesor":"González Reyes Manuel"},{"grupo":"5° B Enf","salon":"A2","dia":"Lunes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Cuidado del niño","profesor":"González Reyes Manuel"},{"grupo":"5° C Enf","salon":"A3","dia":"Lunes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Tutoría V","profesor":"Hernández López Eva"},{"grupo":"5° C Enf","salon":"A3","dia":"Lunes","hora_inicio":"17:00","hora_fin":"17:50","materia":"La energía en los procesos de la vida diaria","profesor":"Marmolejo Cortés Francisca"},{"grupo":"5° C Enf","salon":"A3","dia":"Lunes","hora_inicio":"18:10","hora_fin":"18:55","materia":"La energía en los procesos de la vida diaria","profesor":"Marmolejo Cortés Francisca"},{"grupo":"5° C Enf","salon":"A3","dia":"Lunes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Conciencia Historica II","profesor":"Pérez Barbarena Héctor"},{"grupo":"5° C Enf","salon":"A3","dia":"Lunes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Conciencia Historica II","profesor":"Pérez Barbarena Héctor"},{"grupo":"5° C Enf","salon":"A3","dia":"Lunes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Conciencia Historica II","profesor":"Pérez Barbarena Héctor"},{"grupo":"5° D Enf","salon":"A4","dia":"Lunes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Cuidado de la mujer","profesor":"Lizaola Díaz María Guadalupe"},{"grupo":"5° D Enf","salon":"A4","dia":"Lunes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Cuidado de la mujer","profesor":"Lizaola Díaz María Guadalupe"},{"grupo":"5° D Enf","salon":"A4","dia":"Lunes","hora_inicio":"16:10","hora_fin":"17:00","materia":"La energía en los procesos de la vida diaria","profesor":"Marmolejo Cortés Francisca"},{"grupo":"5° D Enf","salon":"A4","dia":"Lunes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Temas selectos de matematicas II","profesor":"Marmolejo Cortés Francisca"},{"grupo":"5° A Rad","salon":"A5","dia":"Lunes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Conciencia Historica II","profesor":"Pérez Barbarena Héctor"},{"grupo":"5° A Rad","salon":"A5","dia":"Lunes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Conciencia Historica II","profesor":"Pérez Barbarena Héctor"},{"grupo":"5° A Rad","salon":"A5","dia":"Lunes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Anatomía Imagenológica","profesor":"Vela Dos Santos Ruve"},{"grupo":"5° A Rad","salon":"A5","dia":"Lunes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Anatomía Imagenológica","profesor":"Vela Dos Santos Ruve"},{"grupo":"5° A Rad","salon":"A5","dia":"Lunes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Seres Humanos: estructura y procesos","profesor":"Cortés Sánchez Claudia Flor"},{"grupo":"5° A Rad","salon":"A5","dia":"Lunes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Tutoría V","profesor":"Guerrero Vera Carlos"},{"grupo":"5° A Rad","salon":"A5","dia":"Lunes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Temas selectos de matematicas II","profesor":"Marmolejo Cortés Francisca"},{"grupo":"5° A Rad","salon":"A5","dia":"Lunes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Temas selectos de matematicas II","profesor":"Marmolejo Cortés Francisca"},{"grupo":"5° B Rad","salon":"A14","dia":"Lunes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Seres Humanos: estructura y procesos","profesor":"Cortés Sánchez Claudia Flor"},{"grupo":"5° B Rad","salon":"A14","dia":"Lunes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Seres Humanos: estructura y procesos","profesor":"Cortés Sánchez Claudia Flor"},{"grupo":"5° B Rad","salon":"A14","dia":"Lunes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Conciencia Historica II","profesor":"Pérez Barbarena Héctor"},{"grupo":"5° B Rad","salon":"A14","dia":"Lunes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Socioemocionales V","profesor":"Morales Vigueras Eduardo Adán"},{"grupo":"5° B Rad","salon":"A14","dia":"Lunes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Temas selectos de matematicas II","profesor":"Marmolejo Cortés Francisca"},{"grupo":"5° B Rad","salon":"A14","dia":"Lunes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Anatomía Imagenológica","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"5° B Rad","salon":"A14","dia":"Lunes","hora_inicio":"19:40","hora_fin":"20:25","materia":"USG y Resonancia magnetica","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"5° B Rad","salon":"A14","dia":"Lunes","hora_inicio":"20:25","hora_fin":"21:10","materia":"USG y Resonancia magnetica","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"5° C Rad","salon":"A15","dia":"Lunes","hora_inicio":"16:10","hora_fin":"17:00","materia":"USG y Resonancia magnetica","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"5° C Rad","salon":"A15","dia":"Lunes","hora_inicio":"17:00","hora_fin":"17:50","materia":"USG y Resonancia magnetica","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"5° C Rad","salon":"A15","dia":"Lunes","hora_inicio":"18:10","hora_fin":"18:55","materia":"USG y Resonancia magnetica","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"5° C Rad","salon":"A15","dia":"Lunes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Temas selectos de matematicas II","profesor":"Marmolejo Cortés Francisca"},{"grupo":"5° C Rad","salon":"A15","dia":"Lunes","hora_inicio":"19:40","hora_fin":"20:25","materia":"Conciencia Historica II","profesor":"Pérez Barbarena Héctor"},{"grupo":"5° C Rad","salon":"A15","dia":"Lunes","hora_inicio":"20:25","hora_fin":"21:10","materia":"Conciencia Historica II","profesor":"Pérez Barbarena Héctor"},{"grupo":"5° A Enf","salon":"A1","dia":"Martes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Cuidado de la mujer","profesor":"Lizaola Díaz María Guadalupe"},{"grupo":"5° A Enf","salon":"A1","dia":"Martes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Tutoría V","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"5° A Enf","salon":"A1","dia":"Martes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Tutoría V","profesor":"Beltrán Espinosa Igor Fabián"},{"grupo":"5° A Enf","salon":"A1","dia":"Martes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Ingles V","profesor":"Flores Reyes Miguel Ángel"},{"grupo":"5° A Enf","salon":"A1","dia":"Martes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Socioemocionales V","profesor":"Morales Vigueras Eduardo Adán"},{"grupo":"5° B Enf","salon":"A2","dia":"Martes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Cuidado del niño","profesor":"González Reyes Manuel"},{"grupo":"5° B Enf","salon":"A2","dia":"Martes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Cuidado del niño","profesor":"González Reyes Manuel"},{"grupo":"5° B Enf","salon":"A2","dia":"Martes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Temas selectos de matematicas II","profesor":"Castañeda Mendoza Elizabeth"},{"grupo":"5° B Enf","salon":"A2","dia":"Martes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Socioemocionales V","profesor":"Morales Vigueras Eduardo Adán"},{"grupo":"5° C Enf","salon":"A15","dia":"Martes","hora_inicio":"14:30","hora_fin":"15:20","materia":"La energía en los procesos de la vida diaria","profesor":"Marmolejo Cortés Francisca"},{"grupo":"5° C Enf","salon":"A15","dia":"Martes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Ingles V","profesor":"Flores Reyes Miguel Ángel"},{"grupo":"5° C Enf","salon":"A15","dia":"Martes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Tutoría V","profesor":"Cortés Sánchez Claudia Flor"},{"grupo":"5° C Enf","salon":"A15","dia":"Martes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Tutoría V","profesor":"Cortés Sánchez Claudia Flor"},{"grupo":"5° D Enf","salon":"A4","dia":"Martes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Cuidado del niño","profesor":"Díaz Orozco Rita Susana"},{"grupo":"5° D Enf","salon":"A4","dia":"Martes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Cuidado del niño","profesor":"Díaz Orozco Rita Susana"},{"grupo":"5° D Enf","salon":"A4","dia":"Martes","hora_inicio":"16:10","hora_fin":"17:00","materia":"La energía en los procesos de la vida diaria","profesor":"Marmolejo Cortés Francisca"},{"grupo":"5° D Enf","salon":"A4","dia":"Martes","hora_inicio":"17:00","hora_fin":"17:50","materia":"La energía en los procesos de la vida diaria","profesor":"Marmolejo Cortés Francisca"},{"grupo":"5° A Rad","salon":"A5","dia":"Martes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Temas selectos de matematicas II","profesor":"Marmolejo Cortés Francisca"},{"grupo":"5° A Rad","salon":"A5","dia":"Martes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Temas selectos de matematicas II","profesor":"Marmolejo Cortés Francisca"},{"grupo":"5° A Rad","salon":"A5","dia":"Martes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Seres Humanos: estructura y procesos","profesor":"Cortés Sánchez Claudia Flor"},{"grupo":"5° A Rad","salon":"A5","dia":"Martes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Conciencia Historica II","profesor":"Pérez Barbarena Héctor"},{"grupo":"5° A Rad","salon":"A5","dia":"Martes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Conciencia Historica II","profesor":"Pérez Barbarena Héctor"},{"grupo":"5° A Rad","salon":"A5","dia":"Martes","hora_inicio":"19:40","hora_fin":"20:25","materia":"USG y Resonancia magnetica","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"5° A Rad","salon":"A5","dia":"Martes","hora_inicio":"20:25","hora_fin":"21:10","materia":"USG y Resonancia magnetica","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"5° B Rad","salon":"A14","dia":"Martes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Anatomía Imagenológica","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"5° B Rad","salon":"A14","dia":"Martes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Anatomía Imagenológica","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"5° B Rad","salon":"A14","dia":"Martes","hora_inicio":"16:10","hora_fin":"17:00","materia":"USG y Resonancia magnetica","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"5° B Rad","salon":"A14","dia":"Martes","hora_inicio":"17:00","hora_fin":"17:50","materia":"USG y Resonancia magnetica","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"5° B Rad","salon":"A14","dia":"Martes","hora_inicio":"18:10","hora_fin":"18:55","materia":"Temas selectos de matematicas II","profesor":"Marmolejo Cortés Francisca"},{"grupo":"5° B Rad","salon":"A14","dia":"Martes","hora_inicio":"18:55","hora_fin":"19:40","materia":"Seres Humanos: estructura y procesos","profesor":"Cortés Sánchez Claudia Flor"},{"grupo":"5° C Rad","salon":"A15","dia":"Lunes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Seres Humanos: estructura y procesos","profesor":"Cortés Sánchez Claudia Flor"},{"grupo":"5° C Rad","salon":"A15","dia":"Lunes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Seres Humanos: estructura y procesos","profesor":"Cortés Sánchez Claudia Flor"},{"grupo":"5° A Enf","salon":"A1","dia":"Miércoles","hora_inicio":"14:30","hora_fin":"15:20","materia":"Seres Humanos: estructura y procesos","profesor":"Lizaola Díaz María Guadalupe"},{"grupo":"5° A Enf","salon":"A1","dia":"Miércoles","hora_inicio":"15:20","hora_fin":"16:10","materia":"Cuidado del niño","profesor":"Díaz Orozco Rita Susana"},{"grupo":"5° A Enf","salon":"A1","dia":"Miércoles","hora_inicio":"16:10","hora_fin":"17:00","materia":"Cuidado del niño","profesor":"Díaz Orozco Rita Susana"},{"grupo":"5° A Enf","salon":"A1","dia":"Miércoles","hora_inicio":"17:00","hora_fin":"17:50","materia":"Ingles V","profesor":"Flores Reyes Miguel Ángel"},{"grupo":"5° A Enf","salon":"A1","dia":"Miércoles","hora_inicio":"18:10","hora_fin":"18:55","materia":"La energía en los procesos de la vida diaria","profesor":"López Ruiz Jesús Raymundo"},{"grupo":"5° A Enf","salon":"A1","dia":"Miércoles","hora_inicio":"18:55","hora_fin":"19:40","materia":"La energía en los procesos de la vida diaria","profesor":"López Ruiz Jesús Raymundo"},{"grupo":"5° A Enf","salon":"A1","dia":"Miércoles","hora_inicio":"19:40","hora_fin":"20:25","materia":"Conciencia Historica II","profesor":"Pérez Barbarena Héctor"},{"grupo":"5° B Enf","salon":"A2","dia":"Miércoles","hora_inicio":"14:30","hora_fin":"15:20","materia":"Cuidado del niño","profesor":"González Reyes Manuel"},{"grupo":"5° B Enf","salon":"A2","dia":"Miércoles","hora_inicio":"15:20","hora_fin":"16:10","materia":"Cuidado del niño","profesor":"González Reyes Manuel"},{"grupo":"5° B Enf","salon":"A2","dia":"Miércoles","hora_inicio":"16:10","hora_fin":"17:00","materia":"Conciencia Historica II","profesor":"Pérez Barbarena Héctor"},{"grupo":"5° B Enf","salon":"A2","dia":"Miércoles","hora_inicio":"17:00","hora_fin":"17:50","materia":"Conciencia Historica II","profesor":"Pérez Barbarena Héctor"},{"grupo":"5° C Enf","salon":"A15","dia":"Miércoles","hora_inicio":"14:30","hora_fin":"15:20","materia":"Conciencia Historica II","profesor":"Pérez Barbarena Héctor"},{"grupo":"5° C Enf","salon":"A15","dia":"Miércoles","hora_inicio":"15:20","hora_fin":"16:10","materia":"Seres Humanos: estructura y procesos","profesor":"Cortés Sánchez Claudia Flor"},{"grupo":"5° C Enf","salon":"A15","dia":"Miércoles","hora_inicio":"16:10","hora_fin":"17:00","materia":"Seres Humanos: estructura y procesos","profesor":"Cortés Sánchez Claudia Flor"},{"grupo":"5° C Enf","salon":"A15","dia":"Miércoles","hora_inicio":"17:00","hora_fin":"17:50","materia":"Seres Humanos: estructura y procesos","profesor":"Cortés Sánchez Claudia Flor"},{"grupo":"5° D Enf","salon":"A4","dia":"Miércoles","hora_inicio":"14:30","hora_fin":"15:20","materia":"Seres Humanos: estructura y procesos","profesor":"Cortés Sánchez Claudia Flor"},{"grupo":"5° D Enf","salon":"A4","dia":"Miércoles","hora_inicio":"15:20","hora_fin":"16:10","materia":"Seres Humanos: estructura y procesos","profesor":"Cortés Sánchez Claudia Flor"},{"grupo":"5° D Enf","salon":"A4","dia":"Miércoles","hora_inicio":"16:10","hora_fin":"17:00","materia":"Cuidado de la mujer","profesor":"Lizaola Díaz María Guadalupe"},{"grupo":"5° D Enf","salon":"A4","dia":"Miércoles","hora_inicio":"17:00","hora_fin":"17:50","materia":"Cuidado de la mujer","profesor":"Lizaola Díaz María Guadalupe"},{"grupo":"5° B Rad","salon":"A14","dia":"Miércoles","hora_inicio":"14:30","hora_fin":"15:20","materia":"Anatomía Imagenológica","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"5° B Rad","salon":"A14","dia":"Miércoles","hora_inicio":"15:20","hora_fin":"16:10","materia":"Anatomía Imagenológica","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"5° B Rad","salon":"A14","dia":"Miércoles","hora_inicio":"16:10","hora_fin":"17:00","materia":"Anatomía Imagenológica","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"5° B Rad","salon":"A14","dia":"Miércoles","hora_inicio":"17:00","hora_fin":"17:50","materia":"Temas selectos de matematicas II","profesor":"Marmolejo Cortés Francisca"},{"grupo":"5° B Rad","salon":"A14","dia":"Miércoles","hora_inicio":"18:10","hora_fin":"18:55","materia":"Tutoría V","profesor":"Rodríguez Butanda María de la Cruz"},{"grupo":"5° B Rad","salon":"A14","dia":"Miércoles","hora_inicio":"18:55","hora_fin":"19:40","materia":"Tutoría V","profesor":"Rodríguez Butanda María de la Cruz"},{"grupo":"5° B Rad","salon":"A14","dia":"Miércoles","hora_inicio":"19:40","hora_fin":"20:25","materia":"Ingles V","profesor":"Flores Reyes Miguel Ángel"},{"grupo":"5° B Rad","salon":"A14","dia":"Miércoles","hora_inicio":"20:25","hora_fin":"21:10","materia":"Ingles V","profesor":"Flores Reyes Miguel Ángel"},{"grupo":"5° A Rad","salon":"A5","dia":"Miércoles","hora_inicio":"14:30","hora_fin":"15:20","materia":"Anatomía Imagenológica","profesor":"Vela Dos Santos Ruve"},{"grupo":"5° A Rad","salon":"A5","dia":"Miércoles","hora_inicio":"15:20","hora_fin":"16:10","materia":"Anatomía Imagenológica","profesor":"Vela Dos Santos Ruve"},{"grupo":"5° A Rad","salon":"A5","dia":"Miércoles","hora_inicio":"16:10","hora_fin":"17:00","materia":"La energía en los procesos de la vida diaria","profesor":"López Ruiz Jesús Raymundo"},{"grupo":"5° A Rad","salon":"A5","dia":"Miércoles","hora_inicio":"17:00","hora_fin":"17:50","materia":"La energía en los procesos de la vida diaria","profesor":"López Ruiz Jesús Raymundo"},{"grupo":"5° A Rad","salon":"A5","dia":"Miércoles","hora_inicio":"18:10","hora_fin":"18:55","materia":"Socioemocionales V","profesor":"Morales Vigueras Eduardo Adán"},{"grupo":"5° A Rad","salon":"A5","dia":"Miércoles","hora_inicio":"18:55","hora_fin":"19:40","materia":"Ingles V","profesor":"Flores Reyes Miguel Ángel"},{"grupo":"5° A Rad","salon":"A5","dia":"Miércoles","hora_inicio":"19:40","hora_fin":"20:25","materia":"USG y Resonancia magnetica","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"5° A Rad","salon":"A5","dia":"Miércoles","hora_inicio":"20:25","hora_fin":"21:10","materia":"USG y Resonancia magnetica","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"5° C Rad","salon":"A15","dia":"Miércoles","hora_inicio":"14:30","hora_fin":"15:20","materia":"Ingles V","profesor":"Flores Reyes Miguel Ángel"},{"grupo":"5° C Rad","salon":"A15","dia":"Miércoles","hora_inicio":"15:20","hora_fin":"16:10","materia":"Ingles V","profesor":"Flores Reyes Miguel Ángel"},{"grupo":"5° C Rad","salon":"A15","dia":"Miércoles","hora_inicio":"18:10","hora_fin":"18:55","materia":"USG y Resonancia magnetica","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"5° C Rad","salon":"A15","dia":"Miércoles","hora_inicio":"18:55","hora_fin":"19:40","materia":"La energía en los procesos de la vida diaria","profesor":"López Ruiz Jesús Raymundo"},{"grupo":"5° C Rad","salon":"A15","dia":"Miércoles","hora_inicio":"19:40","hora_fin":"20:25","materia":"La energía en los procesos de la vida diaria","profesor":"López Ruiz Jesús Raymundo"},{"grupo":"5° A Enf","salon":"A1","dia":"Jueves","hora_inicio":"14:30","hora_fin":"15:20","materia":"Ingles V","profesor":"Flores Reyes Miguel Ángel"},{"grupo":"5° A Enf","salon":"A1","dia":"Jueves","hora_inicio":"15:20","hora_fin":"16:10","materia":"Temas selectos de matematicas II","profesor":"Castañeda Mendoza Elizabeth"},{"grupo":"5° A Enf","salon":"A1","dia":"Jueves","hora_inicio":"16:10","hora_fin":"17:00","materia":"Cuidado de la mujer","profesor":"Lizaola Díaz María Guadalupe"},{"grupo":"5° A Enf","salon":"A1","dia":"Jueves","hora_inicio":"17:00","hora_fin":"17:50","materia":"Cuidado de la mujer","profesor":"Lizaola Díaz María Guadalupe"},{"grupo":"5° B Enf","salon":"A2","dia":"Jueves","hora_inicio":"14:30","hora_fin":"15:20","materia":"Seres Humanos: estructura y procesos","profesor":"Lizaola Díaz María Guadalupe"},{"grupo":"5° B Enf","salon":"A2","dia":"Jueves","hora_inicio":"15:20","hora_fin":"16:10","materia":"Seres Humanos: estructura y procesos","profesor":"Lizaola Díaz María Guadalupe"},{"grupo":"5° B Enf","salon":"A2","dia":"Jueves","hora_inicio":"16:10","hora_fin":"17:00","materia":"Cuidado del niño","profesor":"González Reyes Manuel"},{"grupo":"5° B Enf","salon":"A2","dia":"Jueves","hora_inicio":"17:00","hora_fin":"17:50","materia":"Cuidado del niño","profesor":"González Reyes Manuel"},{"grupo":"5° C Enf","salon":"A15","dia":"Jueves","hora_inicio":"14:30","hora_fin":"15:20","materia":"Seres Humanos: estructura y procesos","profesor":"Cortés Sánchez Claudia Flor"},{"grupo":"5° C Enf","salon":"A15","dia":"Jueves","hora_inicio":"15:20","hora_fin":"16:10","materia":"Cuidado del niño","profesor":"Díaz Orozco Rita Susana"},{"grupo":"5° C Enf","salon":"A15","dia":"Jueves","hora_inicio":"16:10","hora_fin":"17:00","materia":"Cuidado del niño","profesor":"Díaz Orozco Rita Susana"},{"grupo":"5° C Enf","salon":"A15","dia":"Jueves","hora_inicio":"17:00","hora_fin":"17:50","materia":"Cuidado del niño","profesor":"Díaz Orozco Rita Susana"},{"grupo":"5° D Enf","salon":"A4","dia":"Jueves","hora_inicio":"14:30","hora_fin":"15:20","materia":"Cuidado del niño","profesor":"Díaz Orozco Rita Susana"},{"grupo":"5° D Enf","salon":"A4","dia":"Jueves","hora_inicio":"15:20","hora_fin":"16:10","materia":"Cuidado del niño","profesor":"Díaz Orozco Rita Susana"},{"grupo":"5° D Enf","salon":"A4","dia":"Jueves","hora_inicio":"16:10","hora_fin":"17:00","materia":"Seres Humanos: estructura y procesos","profesor":"Cortés Sánchez Claudia Flor"},{"grupo":"5° D Enf","salon":"A4","dia":"Jueves","hora_inicio":"17:00","hora_fin":"17:50","materia":"Temas selectos de matematicas II","profesor":"Marmolejo Cortés Francisca"},{"grupo":"5° D Enf","salon":"A4","dia":"Jueves","hora_inicio":"18:10","hora_fin":"18:55","materia":"Temas selectos de matematicas II","profesor":"Marmolejo Cortés Francisca"},{"grupo":"5° A Rad","salon":"A5","dia":"Jueves","hora_inicio":"14:30","hora_fin":"15:20","materia":"Tutoría V","profesor":"Guerrero Vera Carlos"},{"grupo":"5° A Rad","salon":"A5","dia":"Jueves","hora_inicio":"15:20","hora_fin":"16:10","materia":"Seres Humanos: estructura y procesos","profesor":"Cortés Sánchez Claudia Flor"},{"grupo":"5° A Rad","salon":"A5","dia":"Jueves","hora_inicio":"16:10","hora_fin":"17:00","materia":"Ingles V","profesor":"Flores Reyes Miguel Ángel"},{"grupo":"5° A Rad","salon":"A5","dia":"Jueves","hora_inicio":"17:00","hora_fin":"17:50","materia":"USG y Resonancia magnetica","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"5° B Rad","salon":"A14","dia":"Jueves","hora_inicio":"14:30","hora_fin":"15:20","materia":"Anatomía Imagenológica","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"5° B Rad","salon":"A14","dia":"Jueves","hora_inicio":"15:20","hora_fin":"16:10","materia":"Temas selectos de matematicas II","profesor":"Marmolejo Cortés Francisca"},{"grupo":"5° B Rad","salon":"A14","dia":"Jueves","hora_inicio":"16:10","hora_fin":"17:00","materia":"Temas selectos de matematicas II","profesor":"Marmolejo Cortés Francisca"},{"grupo":"5° C Rad","salon":"A15","dia":"Jueves","hora_inicio":"14:30","hora_fin":"15:20","materia":"Anatomía Imagenológica","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"5° C Rad","salon":"A15","dia":"Jueves","hora_inicio":"15:20","hora_fin":"16:10","materia":"Anatomía Imagenológica","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"5° C Rad","salon":"A15","dia":"Jueves","hora_inicio":"16:10","hora_fin":"17:00","materia":"Temas selectos de matematicas II","profesor":"Marmolejo Cortés Francisca"},{"grupo":"5° A Enf","salon":"A1","dia":"Viernes","hora_inicio":"14:30","hora_fin":"15:20","materia":"La energía en los procesos de la vida diaria","profesor":"López Ruiz Jesús Raymundo"},{"grupo":"5° A Enf","salon":"A1","dia":"Viernes","hora_inicio":"15:20","hora_fin":"16:10","materia":"La energía en los procesos de la vida diaria","profesor":"López Ruiz Jesús Raymundo"},{"grupo":"5° A Enf","salon":"A1","dia":"Viernes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Cuidado de la mujer","profesor":"Lizaola Díaz María Guadalupe"},{"grupo":"5° A Enf","salon":"A1","dia":"Viernes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Cuidado de la mujer","profesor":"Lizaola Díaz María Guadalupe"},{"grupo":"5° B Enf","salon":"A2","dia":"Viernes","hora_inicio":"14:30","hora_fin":"15:20","materia":"La energía en los procesos de la vida diaria","profesor":"Marmolejo Cortés Francisca"},{"grupo":"5° B Enf","salon":"A2","dia":"Viernes","hora_inicio":"15:20","hora_fin":"16:10","materia":"La energía en los procesos de la vida diaria","profesor":"Marmolejo Cortés Francisca"},{"grupo":"5° B Enf","salon":"A2","dia":"Viernes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Tutoría V","profesor":"Hernández López Eva"},{"grupo":"5° B Enf","salon":"A2","dia":"Viernes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Tutoría V","profesor":"Hernández López Eva"},{"grupo":"5° C Enf","salon":"A15","dia":"Viernes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Ingles V","profesor":"Flores Reyes Miguel Ángel"},{"grupo":"5° C Enf","salon":"A15","dia":"Viernes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Ingles V","profesor":"Flores Reyes Miguel Ángel"},{"grupo":"5° C Enf","salon":"A15","dia":"Viernes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Conciencia Historica II","profesor":"Pérez Barbarena Héctor"},{"grupo":"5° C Enf","salon":"A15","dia":"Viernes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Conciencia Historica II","profesor":"Pérez Barbarena Héctor"},{"grupo":"5° D Enf","salon":"A4","dia":"Viernes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Ingles V","profesor":"Flores Reyes Miguel Ángel"},{"grupo":"5° D Enf","salon":"A4","dia":"Viernes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Ingles V","profesor":"Flores Reyes Miguel Ángel"},{"grupo":"5° D Enf","salon":"A4","dia":"Viernes","hora_inicio":"16:10","hora_fin":"17:00","materia":"Conciencia Historica II","profesor":"Pérez Barbarena Héctor"},{"grupo":"5° D Enf","salon":"A4","dia":"Viernes","hora_inicio":"17:00","hora_fin":"17:50","materia":"Conciencia Historica II","profesor":"Pérez Barbarena Héctor"},{"grupo":"5° A Rad","salon":"A5","dia":"Viernes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Anatomía Imagenológica","profesor":"Vela Dos Santos Ruve"},{"grupo":"5° A Rad","salon":"A5","dia":"Viernes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Anatomía Imagenológica","profesor":"Vela Dos Santos Ruve"},{"grupo":"5° A Rad","salon":"A5","dia":"Viernes","hora_inicio":"16:10","hora_fin":"17:00","materia":"La energía en los procesos de la vida diaria","profesor":"López Ruiz Jesús Raymundo"},{"grupo":"5° A Rad","salon":"A5","dia":"Viernes","hora_inicio":"17:00","hora_fin":"17:50","materia":"La energía en los procesos de la vida diaria","profesor":"López Ruiz Jesús Raymundo"},{"grupo":"5° B Rad","salon":"A14","dia":"Viernes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Conciencia Historica II","profesor":"Pérez Barbarena Héctor"},{"grupo":"5° B Rad","salon":"A14","dia":"Viernes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Conciencia Historica II","profesor":"Pérez Barbarena Héctor"},{"grupo":"5° B Rad","salon":"A14","dia":"Viernes","hora_inicio":"16:10","hora_fin":"17:00","materia":"USG y Resonancia magnetica","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"5° B Rad","salon":"A14","dia":"Viernes","hora_inicio":"17:00","hora_fin":"17:50","materia":"USG y Resonancia magnetica","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"5° C Rad","salon":"A15","dia":"Viernes","hora_inicio":"14:30","hora_fin":"15:20","materia":"Anatomía Imagenológica","profesor":"Flores Gonzalez Jose Gabriel"},{"grupo":"5° C Rad","salon":"A15","dia":"Viernes","hora_inicio":"15:20","hora_fin":"16:10","materia":"Anatomía Imagenológica","profesor":"Flores Gonzalez Jose Gabriel"}]
-                           document.addEventListener('DOMContentLoaded', () => {
+        const horariosData = [{}];
+        document.addEventListener('DOMContentLoaded', () => {
             const table = document.getElementById('schedule-table');
             const modal = document.getElementById('class-modal');
             const daySelector = document.getElementById('day-selector');
+            const viewSelector = document.getElementById('view-selector');
+            const sizeTrigger = document.getElementById('size-trigger');
+            const sizeMenu = document.getElementById('size-menu');
+            const filtersTrigger = document.getElementById('filters-trigger');
+            const filtersMenu = document.getElementById('filters-menu');
+            const teacherSelectInline = document.getElementById('teacher-select-inline');
+            const groupSelectInline = document.getElementById('group-select-inline');
+            const teacherSelect = document.getElementById('teacher-select');
+            const groupSelect = document.getElementById('group-select');
+            const searchInput = document.getElementById('search-input');
+            const nowToggle = document.getElementById('now-toggle');
+            const resetBtn = document.getElementById('reset-btn');
             const palette = ["#1abc9c", "#2ecc71", "#3498db", "#9b59b6", "#34495e", "#f1c40f", "#e67e22", "#e74c3c", "#7f8c8d", "#16a085", "#27ae60", "#2980b9", "#8e44ad", "#f39c12", "#d35400", "#c0392b"];
 
             const getInitials = n => n.toLowerCase() === 'sin profesor' ? 'S/P' : n.split(' ').map(s => s[0]).join('').slice(0, 3);
             const getColor = s => palette[s.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % palette.length];
 
-            const render = day => {
-                const dayData = horariosData.filter(i => i.dia === day);
+            const normalize = s => (s || '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+            const sortEs = (a, b) => a.localeCompare(b, 'es', { sensitivity: 'base', numeric: true });
+
+            // Helpers para construir <optgroup> ordenados
+            const buildTeacherOptions = (nombres) => {
+                // Agrupar por inicial (A-Z)
+                const groups = new Map();
+                nombres.forEach(n => {
+                    const initial = (normalize(n)[0] || '#').toUpperCase();
+                    if (!groups.has(initial)) groups.set(initial, []);
+                    groups.get(initial).push(n);
+                });
+                // Ordenar claves e items
+                const initials = Array.from(groups.keys()).sort((a, b) => sortEs(a, b));
+                const frag = document.createDocumentFragment();
+                initials.forEach(letter => {
+                    const og = document.createElement('optgroup');
+                    og.label = letter;
+                    const arr = groups.get(letter).sort((a, b) => sortEs(a, b));
+                    arr.forEach(v => {
+                        const opt = document.createElement('option');
+                        opt.value = v;
+                        opt.textContent = v;
+                        og.appendChild(opt);
+                    });
+                    frag.appendChild(og);
+                });
+                return frag;
+            };
+
+            const buildGroupOptions = (gruposLista) => {
+                // Normalización básica del string
+                const clean = (s) => (s || '').toString().replace(/\s+/g, ' ').trim();
+                // Extraer grado, letra y especialidad con regex tolerante a símbolos (° º o)
+                const parse = (g) => {
+                    const str = clean(g);
+                    const m = /^(\d+)\s*[°ºo]?\s*([A-Za-zÁÉÍÓÚÑ])\s*(.*)$/i.exec(str);
+                    const grade = m ? `${m[1]}°` : 'Otros';
+                    const letter = m ? m[2].toUpperCase() : 'Z';
+                    const rest = m ? clean(m[3]) : str;
+                    return { original: str, grade, letter, rest };
+                };
+                const items = gruposLista.map(parse);
+                // Agrupar por grado
+                const groups = new Map();
+                for (const it of items) {
+                    if (!groups.has(it.grade)) groups.set(it.grade, []);
+                    groups.get(it.grade).push(it);
+                }
+                const orderKey = k => (k === 'Otros' ? 99 : parseInt(k));
+                const grades = Array.from(groups.keys()).sort((a, b) => orderKey(a) - orderKey(b));
+                const frag = document.createDocumentFragment();
+                for (const grade of grades) {
+                    const og = document.createElement('optgroup');
+                    og.label = grade;
+                    const arr = groups.get(grade).sort((a, b) => {
+                        const byLetter = sortEs(a.letter, b.letter);
+                        if (byLetter !== 0) return byLetter;
+                        return sortEs(a.rest, b.rest);
+                    });
+                    for (const it of arr) {
+                        const opt = document.createElement('option');
+                        opt.value = it.original;
+                        opt.textContent = it.original;
+                        og.appendChild(opt);
+                    }
+                    frag.appendChild(og);
+                }
+                return frag;
+            };
+
+            const render = (day, query = '', teacher = '', view = 'dia', group = '') => {
+                const q = normalize(query);
+                const teacherFilter = teacher || '';
+                const groupFilter = group || '';
+
+                // Si no hay maestro seleccionado, la vista forzada es día
+                const hasAnyFilter = Boolean(teacherFilter || groupFilter);
+                const effectiveView = hasAnyFilter ? view : 'dia';
+
+                if (effectiveView === 'semana') {
+                    // Vista semanal para un maestro (o todos): Tabla Hora x Día
+                    const baseData = horariosData.filter(i => {
+                        if (teacherFilter && i.profesor !== teacherFilter) return false;
+                        if (groupFilter && i.grupo !== groupFilter) return false;
+                        if (!q) return true;
+                        const materia = normalize(i.materia);
+                        const profesor = normalize(i.profesor);
+                        const grupo = normalize(i.grupo);
+                        const salon = normalize(i.salon);
+                        return materia.includes(q) || profesor.includes(q) || grupo.includes(q) || salon.includes(q);
+                    });
+                    const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+                    const timeSlots = [...new Set(baseData.map(i => `${i.hora_inicio} - ${i.hora_fin}`))].sort();
+
+                    let headHTML = `<tr><th>Hora/Día</th>${days.map(d => `<th data-day="${d}">${d}</th>`).join('')}</tr>`;
+                    let bodyHTML = timeSlots.map(slot => {
+                        const [start, end] = slot.split(' - ');
+                        let rowHTML = `<td class="row-header">${slot}</td>`;
+                        rowHTML += days.map(d => {
+                            const classInfo = baseData.find(i => i.dia === d && i.hora_inicio === start && i.hora_fin === end);
+                            if (!classInfo) return '<td></td>';
+                            return `<td data-time="${slot}" data-day="${d}"><div class="class-cell" style="background-color:${getColor(classInfo.profesor)}" data-index="${horariosData.indexOf(classInfo)}">
+                                        <span class="cell-group">${classInfo.grupo} • ${classInfo.salon}</span>
+                                        <span class="cell-teacher">${getInitials(classInfo.profesor)}</span>
+                                    </div></td>`;
+                        }).join('');
+                        return `<tr>${rowHTML}</tr>`;
+                    }).join('');
+                    table.innerHTML = `<thead>${headHTML}</thead><tbody>${bodyHTML}</tbody>`;
+                    highlightNow(effectiveView);
+                    return;
+                }
+
+                // Vista por día (actual), con filtro por maestro
+                const dayDataFull = horariosData.filter(i => i.dia === day && (!teacherFilter || i.profesor === teacherFilter) && (!groupFilter || i.grupo === groupFilter));
+                const dayData = q ? dayDataFull.filter(i => {
+                    const materia = normalize(i.materia);
+                    const profesor = normalize(i.profesor);
+                    const grupo = normalize(i.grupo);
+                    const salon = normalize(i.salon);
+                    return materia.includes(q) || profesor.includes(q) || grupo.includes(q) || salon.includes(q);
+                }) : dayDataFull;
                 const timeSlots = [...new Set(dayData.map(i => `${i.hora_inicio} - ${i.hora_fin}`))].sort();
                 const rooms = [...new Set(dayData.map(i => i.salon))].sort((a, b) => parseInt(a.slice(1)) - parseInt(b.slice(1)));
 
-                let headHTML = `<tr><th>Aula/Hora</th>${timeSlots.map(s => `<th>${s}</th>`).join('')}</tr>`;
+                let headHTML = `<tr><th>Aula/Hora</th>${timeSlots.map(s => `<th data-time="${s}">${s}</th>`).join('')}</tr>`;
                 let bodyHTML = rooms.map(room => {
                     let rowHTML = `<td class="row-header">${room}</td>`;
                     rowHTML += timeSlots.map(slot => {
                         const [start, end] = slot.split(' - ');
                         const classInfo = dayData.find(i => i.salon === room && i.hora_inicio === start && i.hora_fin === end);
                         if (!classInfo) return '<td></td>';
-                        return `<td><div class="class-cell" style="background-color:${getColor(classInfo.profesor)}" data-index="${horariosData.indexOf(classInfo)}">
+                        return `<td data-time="${slot}"><div class="class-cell" style="background-color:${getColor(classInfo.profesor)}" data-index="${horariosData.indexOf(classInfo)}">
                                     <span class="cell-group">${classInfo.grupo}</span>
                                     <span class="cell-teacher">${getInitials(classInfo.profesor)}</span>
                                 </div></td>`;
@@ -83,37 +823,550 @@
                     return `<tr>${rowHTML}</tr>`;
                 }).join('');
                 table.innerHTML = `<thead>${headHTML}</thead><tbody>${bodyHTML}</tbody>`;
+                highlightNow('dia', day);
+            };
+
+            // Resaltar "ahora"
+            const highlightNow = (view, day) => {
+                const now = new Date();
+                const daysMap = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+                const today = daysMap[now.getDay()];
+                const hh = now.getHours().toString().padStart(2, '0');
+                const mm = now.getMinutes().toString().padStart(2, '0');
+                const current = `${hh}:${mm}`;
+                const inRange = (slot) => {
+                    const [s, , e] = slot.split(/\s+-\s+/);
+                    return s <= current && current <= e;
+                };
+                // limpiar
+                table.querySelectorAll('.is-now-col, .is-now-cell, .is-today-col').forEach(el => el.classList.remove('is-now-col', 'is-now-cell', 'is-today-col'));
+                if (view === 'semana') {
+                    // marcar día actual en thead
+                    const ths = Array.from(table.querySelectorAll('thead th[data-day]'));
+                    const todayTh = ths.find(th => th.dataset.day === today);
+                    if (todayTh) todayTh.classList.add('is-today-col');
+                    // marcar celdas del día actual y hora actual
+                    Array.from(table.querySelectorAll(`tbody td[data-day="${today}"]`)).forEach(td => {
+                        const slot = td.dataset.time;
+                        if (inRange(slot)) td.classList.add('is-now-cell');
+                    });
+                } else {
+                    // vista día: marcar columna de hora actual
+                    Array.from(table.querySelectorAll('thead th[data-time]')).forEach((th, idx) => {
+                        const slot = th.dataset.time;
+                        if (inRange(slot)) {
+                            th.classList.add('is-now-col');
+                            // marcar toda la columna en body
+                            Array.from(table.querySelectorAll(`tbody td[data-time="${slot}"]`)).forEach(td => td.classList.add('is-now-cell'));
+                        }
+                    });
+                }
+            };
+
+            // ========= Autocompletado =========
+            const searchList = document.getElementById('search-list');
+            const combobox = document.getElementById('search-input');
+            let suggestions = [];
+            let activeIndex = -1;
+
+            const closeSuggestions = () => {
+                if (!searchList) return;
+                searchList.innerHTML = '';
+                searchList.classList.remove('open');
+                if (combobox) combobox.setAttribute('aria-expanded', 'false');
+                activeIndex = -1;
+            };
+
+            const openSuggestions = (items) => {
+                if (!searchList) return;
+                if (!items || items.length === 0) { closeSuggestions(); return; }
+                searchList.innerHTML = items.map((it, idx) => `<div class="autocomplete-item" role="option" id="sug-${idx}" data-value="${it.value}" aria-selected="${idx === activeIndex}"><strong>${it.label}</strong><span style="color:#6c757d; margin-left:6px">${it.meta}</span></div>`).join('');
+                searchList.classList.add('open');
+                if (combobox) combobox.setAttribute('aria-expanded', 'true');
+            };
+
+            const buildSuggestionPool = () => {
+                // materias, profesores, grupos, salones
+                const setUnique = (arr) => Array.from(new Set(arr.filter(Boolean)));
+                const materias = setUnique(horariosData.map(i => i.materia)).map(v => ({ type: 'Materia', value: v }));
+                const profesores = setUnique(horariosData.map(i => i.profesor)).map(v => ({ type: 'Profesor', value: v }));
+                const grupos = setUnique(horariosData.map(i => i.grupo)).map(v => ({ type: 'Grupo', value: v }));
+                const salones = setUnique(horariosData.map(i => i.salon)).map(v => ({ type: 'Aula', value: v }));
+                return [...materias, ...profesores, ...grupos, ...salones];
+            };
+
+            const poolMatches = (q) => {
+                const nq = normalize(q);
+                if (!nq) return [];
+                return suggestions
+                    .filter(it => normalize(it.value).includes(nq))
+                    .slice(0, 20)
+                    .map(it => ({ label: it.value, value: it.value, meta: it.type }));
+            };
+
+            if (searchInput) {
+                searchInput.addEventListener('focus', () => {
+                    if (!suggestions.length) suggestions = buildSuggestionPool();
+                    const items = poolMatches(searchInput.value);
+                    openSuggestions(items);
+                });
+                searchInput.addEventListener('input', () => {
+                    if (!suggestions.length) suggestions = buildSuggestionPool();
+                    const items = poolMatches(searchInput.value);
+                    openSuggestions(items);
+                });
+                searchInput.addEventListener('keydown', (e) => {
+                    const items = Array.from(searchList ? searchList.querySelectorAll('.autocomplete-item') : []);
+                    if (!items.length) return;
+                    if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        activeIndex = (activeIndex + 1) % items.length;
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        activeIndex = (activeIndex - 1 + items.length) % items.length;
+                    } else if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (activeIndex >= 0) {
+                            const v = items[activeIndex].dataset.value;
+                            searchInput.value = v;
+                            closeSuggestions();
+                            const activeButton = daySelector.querySelector('.active');
+                            const day = activeButton ? activeButton.dataset.day : 'Lunes';
+                            const activeViewBtn = viewSelector.querySelector('.active');
+                            const teacher = teacherSelect ? teacherSelect.value : '';
+                            const group = groupSelect ? groupSelect.value : '';
+                            const hasAny = Boolean(teacher || group);
+                            const view = hasAny ? (activeViewBtn ? activeViewBtn.dataset.view : 'dia') : 'dia';
+                            render(day, searchInput.value, teacher, view, group);
+                        }
+                    } else if (e.key === 'Escape') {
+                        closeSuggestions();
+                    }
+                    items.forEach((el, idx) => el.setAttribute('aria-selected', String(idx === activeIndex)));
+                });
+                if (searchList) {
+                    searchList.addEventListener('mousedown', (e) => {
+                        const item = e.target.closest('.autocomplete-item');
+                        if (!item) return;
+                        searchInput.value = item.dataset.value || '';
+                        closeSuggestions();
+                        const activeButton = daySelector.querySelector('.active');
+                        const day = activeButton ? activeButton.dataset.day : 'Lunes';
+                        const activeViewBtn = viewSelector.querySelector('.active');
+                        const teacher = teacherSelect ? teacherSelect.value : '';
+                        const group = groupSelect ? groupSelect.value : '';
+                        const hasAny = Boolean(teacher || group);
+                        const view = hasAny ? (activeViewBtn ? activeViewBtn.dataset.view : 'dia') : 'dia';
+                        render(day, searchInput.value, teacher, view, group);
+                    });
+                }
+                window.addEventListener('click', (e) => {
+                    if (!searchList || !searchList.classList.contains('open')) return;
+                    if (e.target === searchInput || (searchList && searchList.contains(e.target))) return;
+                    closeSuggestions();
+                });
+            }
+
+            // Tamaño UI: restaurar preferencia
+            const savedSize = localStorage.getItem('ui-size') || 'normal';
+            document.body.setAttribute('data-ui-size', savedSize);
+            // marcar activo en menú
+            if (sizeMenu) {
+                Array.from(sizeMenu.querySelectorAll('button')).forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.size === savedSize);
+                    btn.setAttribute('aria-checked', String(btn.dataset.size === savedSize));
+                });
+            }
+
+            // abrir/cerrar menú
+            const toggleSizeMenu = (open, event) => {
+                if (!sizeMenu || !sizeTrigger) return;
+                if (open) {
+                    const rect = sizeTrigger.getBoundingClientRect();
+                    const top = rect.bottom + 6;
+                    const left = Math.min(rect.left, window.innerWidth - 220);
+                    sizeMenu.style.top = `${top + window.scrollY}px`;
+                    sizeMenu.style.left = `${left + window.scrollX}px`;
+                    sizeMenu.classList.add('open');
+                    sizeTrigger.setAttribute('aria-expanded', 'true');
+                } else {
+                    sizeMenu.classList.remove('open');
+                    sizeTrigger.setAttribute('aria-expanded', 'false');
+                }
+            };
+
+            if (sizeTrigger) {
+                sizeTrigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isOpen = sizeMenu && sizeMenu.classList.contains('open');
+                    toggleSizeMenu(!isOpen, e);
+                });
+            }
+
+            if (sizeMenu) {
+                sizeMenu.addEventListener('click', (e) => {
+                    const btn = e.target.closest('button[data-size]');
+                    if (!btn) return;
+                    const val = btn.dataset.size || 'normal';
+                    document.body.setAttribute('data-ui-size', val);
+                    localStorage.setItem('ui-size', val);
+                    Array.from(sizeMenu.querySelectorAll('button')).forEach(b => {
+                        b.classList.toggle('active', b === btn);
+                        b.setAttribute('aria-checked', String(b === btn));
+                    });
+                    toggleSizeMenu(false);
+                });
+            }
+
+            // cerrar al hacer click fuera o con Escape
+            window.addEventListener('click', (e) => {
+                if (!sizeMenu || !sizeMenu.classList.contains('open')) return;
+                if (e.target === sizeTrigger || sizeMenu.contains(e.target)) return;
+                toggleSizeMenu(false);
+            });
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && sizeMenu && sizeMenu.classList.contains('open')) toggleSizeMenu(false);
+            });
+
+            // Cargar datos desde archivo JSON externo y renderizar día activo
+            fetch('horarios.json')
+                .then(r => r.json())
+                .then(d => {
+                    // Mantener referencia si horariosData es const
+                    if (Array.isArray(horariosData)) {
+                        horariosData.splice(0, horariosData.length, ...d);
+                    }
+                    // Popular lista de maestros (agrupados por inicial)
+                    if (teacherSelect) {
+                        const profesores = [...new Set(horariosData.map(i => i.profesor).filter(Boolean))];
+                        const fragMain = buildTeacherOptions(profesores);
+                        const fragInline = buildTeacherOptions(profesores);
+                        // limpiar anteriores (dejar solo la primera opción "Todos ...")
+                        while (teacherSelect.children.length > 1) teacherSelect.removeChild(teacherSelect.lastChild);
+                        if (teacherSelectInline) while (teacherSelectInline.children.length > 1) teacherSelectInline.removeChild(teacherSelectInline.lastChild);
+                        teacherSelect.appendChild(fragMain);
+                        if (teacherSelectInline) teacherSelectInline.appendChild(fragInline);
+                    }
+                    // Popular lista de grupos
+                    if (groupSelect) {
+                        const grupos = [...new Set(horariosData.map(i => i.grupo).filter(Boolean))];
+                        const fragMainG = buildGroupOptions(grupos);
+                        const fragInlineG = buildGroupOptions(grupos);
+                        // limpiar anteriores conservando "Todos ..."
+                        while (groupSelect.children.length > 1) groupSelect.removeChild(groupSelect.lastChild);
+                        if (groupSelectInline) while (groupSelectInline.children.length > 1) groupSelectInline.removeChild(groupSelectInline.lastChild);
+                        groupSelect.appendChild(fragMainG);
+                        if (groupSelectInline) groupSelectInline.appendChild(fragInlineG);
+                    }
+                    // Estado inicial de los botones de vista: deshabilitados si no hay maestro o grupo
+                    const setViewButtonsEnabled = enabled => {
+                        Array.from(viewSelector.querySelectorAll('button')).forEach(btn => {
+                            btn.disabled = !enabled;
+                        });
+                        if (!enabled) {
+                            // Asegurar que "Día" quede activo visualmente
+                            const diaBtn = viewSelector.querySelector('[data-view="dia"]');
+                            const activeBtn = viewSelector.querySelector('.active');
+                            if (activeBtn && activeBtn !== diaBtn) activeBtn.classList.remove('active');
+                            if (diaBtn && !diaBtn.classList.contains('active')) diaBtn.classList.add('active');
+                        }
+                    };
+                    setViewButtonsEnabled(Boolean((teacherSelect && teacherSelect.value) || (groupSelect && groupSelect.value)));
+                    const activeButton = daySelector.querySelector('.active');
+                    const activeViewBtn = viewSelector.querySelector('.active');
+                    render(
+                        activeButton ? activeButton.dataset.day : 'Lunes',
+                        searchInput ? searchInput.value : '',
+                        teacherSelect ? teacherSelect.value : '',
+                        activeViewBtn ? activeViewBtn.dataset.view : 'dia',
+                        groupSelect ? groupSelect.value : ''
+                    );
+                })
+                .catch(() => {
+                    // Si falla la carga, no interrumpe la app y se mantienen los datos embebidos
+                });
+
+            // Sincronización bidireccional de filtros
+            const syncTeacher = (source, target) => {
+                if (!source || !target) return;
+                if (target.value !== source.value) target.value = source.value;
+            };
+            const syncGroup = (source, target) => {
+                if (!source || !target) return;
+                if (target.value !== source.value) target.value = source.value;
+            };
+
+            if (teacherSelect && teacherSelectInline) {
+                teacherSelect.addEventListener('change', () => syncTeacher(teacherSelect, teacherSelectInline));
+                teacherSelectInline.addEventListener('change', () => {
+                    syncTeacher(teacherSelectInline, teacherSelect);
+                    teacherSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                });
+            }
+            if (groupSelect && groupSelectInline) {
+                groupSelect.addEventListener('change', () => syncGroup(groupSelect, groupSelectInline));
+                groupSelectInline.addEventListener('change', () => {
+                    syncGroup(groupSelectInline, groupSelect);
+                    groupSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                });
+            }
+
+            // Menú de filtros: abrir/cerrar y posicionar junto al trigger
+            const toggleFiltersMenu = (open) => {
+                if (!filtersMenu || !filtersTrigger) return;
+                if (open) {
+                    const rect = filtersTrigger.getBoundingClientRect();
+                    const top = rect.bottom + 6;
+                    const left = Math.min(rect.left, window.innerWidth - 300);
+                    filtersMenu.style.top = `${top + window.scrollY}px`;
+                    filtersMenu.style.left = `${left + window.scrollX}px`;
+                    filtersMenu.classList.add('open');
+                    filtersTrigger.setAttribute('aria-expanded', 'true');
+                } else {
+                    filtersMenu.classList.remove('open');
+                    filtersTrigger.setAttribute('aria-expanded', 'false');
+                }
+            };
+
+            if (filtersTrigger) {
+                filtersTrigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isOpen = filtersMenu && filtersMenu.classList.contains('open');
+                    toggleFiltersMenu(!isOpen);
+                });
+            }
+
+            // Cerrar menú de filtros con clic fuera o Escape
+            window.addEventListener('click', (e) => {
+                if (filtersMenu && filtersMenu.classList.contains('open')) {
+                    if (e.target !== filtersTrigger && !filtersMenu.contains(e.target)) toggleFiltersMenu(false);
+                }
+            });
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && filtersMenu && filtersMenu.classList.contains('open')) toggleFiltersMenu(false);
+            });
+
+            const openModal = () => {
+                modal.classList.remove('closing');
+                modal.classList.add('open');
+                // Enfocar el botón de cerrar para accesibilidad
+                const closeBtn = document.getElementById('close-modal');
+                if (closeBtn) closeBtn.focus({ preventScroll: true });
+                // Evitar scroll del body mientras el modal está abierto
+                document.documentElement.style.overflow = 'hidden';
+            };
+
+            const closeModalAnimated = () => {
+                if (!modal.classList.contains('open')) return;
+                modal.classList.remove('open');
+                modal.classList.add('closing');
+                const onEnd = () => {
+                    modal.classList.remove('closing');
+                    modal.style.display = 'none';
+                    modal.removeEventListener('animationend', onEnd);
+                };
+                modal.addEventListener('animationend', onEnd);
+                // Restaurar scroll
+                document.documentElement.style.overflow = '';
             };
 
             table.addEventListener('click', e => {
                 const cell = e.target.closest('.class-cell');
                 if (!cell) return;
                 const info = horariosData[cell.dataset.index];
+                // establecer acento del modal basado en el color de la tarjeta
+                const accent = getColor(info.profesor);
+                const modalContent = modal.querySelector('.modal-content');
+                if (modalContent) {
+                    modalContent.style.setProperty('--modal-accent', accent);
+                    // Contraste aproximado para el botón (oscurecer texto si el color es claro)
+                    try {
+                        const rgb = window.getComputedStyle(document.body).color; // fallback para tener un contexto CSSOM
+                    } catch (err) { }
+                    // establecer un contraste neutro
+                    modalContent.style.setProperty('--modal-accent-contrast', '#2c3e50');
+                }
                 document.getElementById('modal-title').textContent = `${info.salon} | ${info.hora_inicio} - ${info.hora_fin}`;
                 document.getElementById('modal-body').innerHTML = `<p><strong>Grupo:</strong> ${info.grupo}</p><p><strong>Profesor:</strong> ${info.profesor}</p><p><strong>Materia:</strong> ${info.materia}</p>`;
                 modal.style.display = 'block';
+                openModal();
             });
 
             daySelector.addEventListener('click', e => {
                 if (e.target.tagName === 'BUTTON') {
                     daySelector.querySelector('.active').classList.remove('active');
                     e.target.classList.add('active');
-                    render(e.target.dataset.day);
+                    const activeViewBtn = viewSelector.querySelector('.active');
+                    render(
+                        e.target.dataset.day,
+                        searchInput ? searchInput.value : '',
+                        teacherSelect ? teacherSelect.value : '',
+                        activeViewBtn ? activeViewBtn.dataset.view : 'dia'
+                    );
                 }
             });
 
-            const closeModal = () => modal.style.display = 'none';
-            document.getElementById('close-modal').onclick = closeModal;
-            window.onclick = e => { if (e.target === modal) closeModal(); };
+            if (viewSelector) {
+                viewSelector.addEventListener('click', e => {
+                    if (e.target.tagName === 'BUTTON') {
+                        if (e.target.disabled) return; // ignorar si deshabilitado
+                        viewSelector.querySelector('.active').classList.remove('active');
+                        e.target.classList.add('active');
+                        const activeButton = daySelector.querySelector('.active');
+                        render(
+                            activeButton ? activeButton.dataset.day : 'Lunes',
+                            searchInput ? searchInput.value : '',
+                            teacherSelect ? teacherSelect.value : '',
+                            e.target.dataset.view,
+                            groupSelect ? groupSelect.value : ''
+                        );
+                    }
+                });
+            }
 
-            const today = ['Lunes','Martes','Miércoles','Jueves','Viernes'][new Date().getDay() - 1] || 'Lunes';
+            if (teacherSelect) {
+                teacherSelect.addEventListener('change', () => {
+                    const activeButton = daySelector.querySelector('.active');
+                    const activeViewBtn = viewSelector.querySelector('.active');
+                    const enableViews = Boolean(teacherSelect.value || (groupSelect && groupSelect.value));
+                    Array.from(viewSelector.querySelectorAll('button')).forEach(btn => btn.disabled = !enableViews);
+                    // Si no hay maestro seleccionado, forzar Día activo
+                    let view = activeViewBtn ? activeViewBtn.dataset.view : 'dia';
+                    if (!enableViews) {
+                        const diaBtn = viewSelector.querySelector('[data-view="dia"]');
+                        if (activeViewBtn && activeViewBtn !== diaBtn) activeViewBtn.classList.remove('active');
+                        if (diaBtn && !diaBtn.classList.contains('active')) diaBtn.classList.add('active');
+                        view = 'dia';
+                    }
+                    render(
+                        activeButton ? activeButton.dataset.day : 'Lunes',
+                        searchInput ? searchInput.value : '',
+                        teacherSelect.value,
+                        view,
+                        groupSelect ? groupSelect.value : ''
+                    );
+                });
+            }
+
+            if (groupSelect) {
+                groupSelect.addEventListener('change', () => {
+                    const activeButton = daySelector.querySelector('.active');
+                    const activeViewBtn = viewSelector.querySelector('.active');
+                    const enableViews = Boolean(groupSelect.value || (teacherSelect && teacherSelect.value));
+                    Array.from(viewSelector.querySelectorAll('button')).forEach(btn => btn.disabled = !enableViews);
+                    // Si no hay filtros, forzar Día activo
+                    let view = activeViewBtn ? activeViewBtn.dataset.view : 'dia';
+                    if (!enableViews) {
+                        const diaBtn = viewSelector.querySelector('[data-view="dia"]');
+                        if (activeViewBtn && activeViewBtn !== diaBtn) activeViewBtn.classList.remove('active');
+                        if (diaBtn && !diaBtn.classList.contains('active')) diaBtn.classList.add('active');
+                        view = 'dia';
+                    }
+                    render(
+                        activeButton ? activeButton.dataset.day : 'Lunes',
+                        searchInput ? searchInput.value : '',
+                        teacherSelect ? teacherSelect.value : '',
+                        view,
+                        groupSelect.value
+                    );
+                });
+            }
+
+            if (searchInput) {
+                const handleSearch = () => {
+                    const activeButton = daySelector.querySelector('.active');
+                    const day = activeButton ? activeButton.dataset.day : 'Lunes';
+                    const activeViewBtn = viewSelector.querySelector('.active');
+                    const teacher = teacherSelect ? teacherSelect.value : '';
+                    const group = groupSelect ? groupSelect.value : '';
+                    const hasAny = Boolean(teacher || group);
+                    const view = hasAny ? (activeViewBtn ? activeViewBtn.dataset.view : 'dia') : 'dia';
+                    render(day, searchInput.value, teacher, view, group);
+                };
+                searchInput.addEventListener('input', handleSearch);
+                searchInput.addEventListener('change', handleSearch);
+            }
+
+            const closeModal = () => closeModalAnimated();
+            document.getElementById('close-modal').addEventListener('click', closeModal);
+            window.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+            window.addEventListener('keydown', e => {
+                if (e.key === 'Escape') closeModal();
+            });
+
+            const today = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'][new Date().getDay() - 1] || 'Lunes';
             const todayBtn = daySelector.querySelector(`[data-day="${today}"]`);
             if (todayBtn) {
                 daySelector.querySelector('.active').classList.remove('active');
                 todayBtn.classList.add('active');
             }
-            render(today);
+            const initialViewBtn = viewSelector.querySelector('.active');
+            const initialTeacher = teacherSelect ? teacherSelect.value : '';
+            const initialGroup = groupSelect ? groupSelect.value : '';
+            const initialHasAny = Boolean(initialTeacher || initialGroup);
+            const initialView = initialHasAny ? (initialViewBtn ? initialViewBtn.dataset.view : 'dia') : 'dia';
+            // Deshabilitar inicialmente los botones de vista si no hay filtros
+            Array.from(viewSelector.querySelectorAll('button')).forEach(btn => btn.disabled = !initialHasAny);
+            render(today, searchInput ? searchInput.value : '', initialTeacher, initialView, initialGroup);
+
+            // Preferencia de indicadores "ahora"
+            const savedNow = localStorage.getItem('ui-show-now');
+            let showNow = savedNow === null ? true : savedNow === 'true';
+            const applyNowState = () => {
+                if (nowToggle) {
+                    nowToggle.classList.toggle('active', showNow);
+                    nowToggle.setAttribute('aria-checked', String(showNow));
+                }
+                const activeViewBtn2 = viewSelector.querySelector('.active');
+                const activeView2 = activeViewBtn2 ? activeViewBtn2.dataset.view : 'dia';
+                const activeButton2 = daySelector.querySelector('.active');
+                const activeDay2 = activeButton2 ? activeButton2.dataset.day : today;
+                if (showNow && typeof highlightNow === 'function') highlightNow(activeView2, activeDay2);
+                if (!showNow) table.querySelectorAll('.is-now-col, .is-now-cell, .is-today-col').forEach(el => el.classList.remove('is-now-col', 'is-now-cell', 'is-today-col'));
+            };
+            applyNowState();
+
+            if (nowToggle) {
+                nowToggle.addEventListener('click', () => {
+                    showNow = !showNow;
+                    localStorage.setItem('ui-show-now', String(showNow));
+                    applyNowState();
+                });
+            }
+
+            // Refrescar indicadores cada minuto si están activos
+            setInterval(() => {
+                if (!showNow) return;
+                const activeViewBtn2 = viewSelector.querySelector('.active');
+                const activeView2 = activeViewBtn2 ? activeViewBtn2.dataset.view : 'dia';
+                const activeButton2 = daySelector.querySelector('.active');
+                const activeDay2 = activeButton2 ? activeButton2.dataset.day : today;
+                if (typeof highlightNow === 'function') highlightNow(activeView2, activeDay2);
+            }, 60000);
+
+            // Reset de filtros y búsqueda
+            if (resetBtn) {
+                resetBtn.addEventListener('click', () => {
+                    if (teacherSelect) teacherSelect.value = '';
+                    if (groupSelect) groupSelect.value = '';
+                    if (teacherSelectInline) teacherSelectInline.value = '';
+                    if (groupSelectInline) groupSelectInline.value = '';
+                    if (searchInput) { searchInput.value = ''; }
+                    // Forzar vista Día
+                    const diaBtn = viewSelector.querySelector('[data-view="dia"]');
+                    const activeViewBtn3 = viewSelector.querySelector('.active');
+                    if (activeViewBtn3 && activeViewBtn3 !== diaBtn) activeViewBtn3.classList.remove('active');
+                    if (diaBtn && !diaBtn.classList.contains('active')) diaBtn.classList.add('active');
+                    // Deshabilitar botones de vista
+                    Array.from(viewSelector.querySelectorAll('button')).forEach(btn => btn.disabled = true);
+                    // Re-render en día actual
+                    const dayBtn = daySelector.querySelector('.active');
+                    const day = dayBtn ? dayBtn.dataset.day : 'Lunes';
+                    render(day, '', '', 'dia', '');
+                });
+            }
         });
     </script>
 </body>
+
 </html>
