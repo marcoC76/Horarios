@@ -663,7 +663,7 @@
 
         const API_URL = 'https://script.google.com/macros/s/AKfycbzkr5Ng0rOQxxuFXYt_350Q6iNn_CXGZ7GlKaFwmA-MZOF1fFCA2a2nlfYBtieeqXQ/exec';
 
-        fetch(API_URL)
+        /* fetch(API_URL)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('La respuesta de la red no fue correcta.');
@@ -679,7 +679,7 @@
             .catch(error => {
                 console.error('Error en la operación de fetch:', error);
                 document.getElementById('output').textContent = `Error al cargar los datos: ${error.message}`;
-            });
+            }); */
 
        
         document.addEventListener('DOMContentLoaded', () => {
@@ -1050,7 +1050,8 @@
             });
 
             // Cargar datos desde archivo JSON externo y renderizar día activo
-            fetch('horarios.json')
+            /* fetch('horarios.json') */
+            fetch(API_URL)
                 .then(r => r.json())
                 .then(d => {
                     // Mantener referencia si horariosData es const
