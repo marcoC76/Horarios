@@ -659,8 +659,29 @@
     </div>
     <script>
         const data = [{ "grupo": "1° A ENF", "salon": "A7", "dia": "Lunes", "hora_inicio": "14:30", "hora_fin": "15:20", "materia": "La materia y sus interacciones", "profesor": "Orozco Colin Asunción" }, { "grupo": "1° A ENF", "salon": "A7", "dia": "Lunes", "hora_inicio": "15:20", "hora_fin": "16:10", "materia": "La materia y sus interacciones", "profesor": "Orozco Colin Asunción" }];
-        // Aquí iría el resto del array JSON completo de la respuesta anterior
-        const horariosData = [{}];
+         const horariosData = [{}];
+
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzkr5Ng0rOQxxuFXYt_350Q6iNn_CXGZ7GlKaFwmA-MZOF1fFCA2a2nlfYBtieeqXQ/exec';
+
+        fetch(API_URL)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('La respuesta de la red no fue correcta.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Datos recibidos:", data);
+                // Muestra el JSON formateado en la página
+                document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+                horariosData = data;
+            })
+            .catch(error => {
+                console.error('Error en la operación de fetch:', error);
+                document.getElementById('output').textContent = `Error al cargar los datos: ${error.message}`;
+            });
+
+       
         document.addEventListener('DOMContentLoaded', () => {
             const table = document.getElementById('schedule-table');
             const modal = document.getElementById('class-modal');
