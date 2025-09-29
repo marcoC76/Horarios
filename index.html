@@ -181,7 +181,6 @@
             color: #2c3e50
         }
 
-        #now-toggle,
         #reset-btn,
         #filters-trigger {
             padding: calc(6px * var(--ui-scale)) calc(10px * var(--ui-scale));
@@ -194,44 +193,7 @@
             color: #2c3e50
         }
 
-        #now-toggle.active {
-            background: #e7f5ff;
-            border-color: #a5d8ff;
-            color: #1971c2
-        }
 
-        /* Switch para "Ahora" */
-        #now-toggle.switch {
-            width: 44px;
-            height: 26px;
-            padding: 0;
-            border-radius: 999px;
-            background: #e9ecef;
-            border-color: #dee2e6;
-            position: relative;
-        }
-
-        #now-toggle.switch::after {
-            content: '';
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #fff;
-            box-shadow: 0 1px 2px #00000026;
-            transition: transform .15s ease-in-out;
-        }
-
-        #now-toggle.switch.active {
-            background: #74c0fc;
-            border-color: #4dabf7;
-        }
-
-        #now-toggle.switch.active::after {
-            transform: translateX(18px)
-        }
 
         .size-menu {
             position: fixed;
@@ -608,8 +570,6 @@
                 <button data-view="dia" class="active">Día</button>
                 <button data-view="semana">Semana</button>
             </div>
-            <button id="now-toggle" role="switch" aria-checked="false" class="switch"
-                title="Indicadores ahora"></button>
             <button id="size-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="size-menu"
                 title="Tamaño de interfaz">Aa</button>
             <button id="filters-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="filters-menu"
@@ -696,7 +656,6 @@
             const teacherSelect = document.getElementById('teacher-select');
             const groupSelect = document.getElementById('group-select');
             const searchInput = document.getElementById('search-input');
-            const nowToggle = document.getElementById('now-toggle');
             const resetBtn = document.getElementById('reset-btn');
             const palette = ["#1abc9c", "#2ecc71", "#3498db", "#9b59b6", "#34495e", "#f1c40f", "#e67e22", "#e74c3c", "#7f8c8d", "#16a085", "#27ae60", "#2980b9", "#8e44ad", "#f39c12", "#d35400", "#c0392b"];
 
@@ -1331,40 +1290,20 @@
             Array.from(viewSelector.querySelectorAll('button')).forEach(btn => btn.disabled = !initialHasAny);
             render(today, searchInput ? searchInput.value : '', initialTeacher, initialView, initialGroup);
 
-            // Preferencia de indicadores "ahora"
-            const savedNow = localStorage.getItem('ui-show-now');
-            let showNow = savedNow === null ? true : savedNow === 'true';
-            const applyNowState = () => {
-                if (nowToggle) {
-                    nowToggle.classList.toggle('active', showNow);
-                    nowToggle.setAttribute('aria-checked', String(showNow));
-                }
-                const activeViewBtn2 = viewSelector.querySelector('.active');
-                const activeView2 = activeViewBtn2 ? activeViewBtn2.dataset.view : 'dia';
-                const activeButton2 = daySelector.querySelector('.active');
-                const activeDay2 = activeButton2 ? activeButton2.dataset.day : today;
-                if (showNow && typeof highlightNow === 'function') highlightNow(activeView2, activeDay2);
-                if (!showNow) table.querySelectorAll('.is-now-col, .is-now-cell, .is-today-col').forEach(el => el.classList.remove('is-now-col', 'is-now-cell', 'is-today-col'));
-            };
-            applyNowState();
-
-            if (nowToggle) {
-                nowToggle.addEventListener('click', () => {
-                    showNow = !showNow;
-                    localStorage.setItem('ui-show-now', String(showNow));
-                    applyNowState();
-                });
-            }
-
-            // Refrescar indicadores cada minuto si están activos
-            setInterval(() => {
-                if (!showNow) return;
+            // Mostrar indicadores de hora actual
+            const highlightNowIndicator = () => {
                 const activeViewBtn2 = viewSelector.querySelector('.active');
                 const activeView2 = activeViewBtn2 ? activeViewBtn2.dataset.view : 'dia';
                 const activeButton2 = daySelector.querySelector('.active');
                 const activeDay2 = activeButton2 ? activeButton2.dataset.day : today;
                 if (typeof highlightNow === 'function') highlightNow(activeView2, activeDay2);
-            }, 60000);
+            };
+            
+            // Mostrar indicadores iniciales
+            highlightNowIndicator();
+            
+            // Actualizar indicadores cada minuto
+            setInterval(highlightNowIndicator, 60000);
 
             // Reset de filtros y búsqueda
             if (resetBtn) {
