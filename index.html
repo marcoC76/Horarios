@@ -294,6 +294,34 @@
             }
         }
 
+        /* Loader overlay */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(2px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1200;
+            color: #2c3e50;
+            font-size: calc(1em * var(--ui-scale));
+        }
+
+        #loader .spinner {
+            width: calc(36px * var(--ui-scale));
+            height: calc(36px * var(--ui-scale));
+            border: 3px solid #e9ecef;
+            border-top-color: #3498db;
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+            margin-right: 12px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         .schedule-container {
             overflow: auto;
             max-height: 75vh;
@@ -410,14 +438,15 @@
 
         .modal-content {
             background-color: #fff;
-            margin: 10% auto;
-            padding: 25px;
-            border-radius: 8px;
+            margin: calc(10% * var(--ui-scale)) auto;
+            padding: calc(25px * var(--ui-scale));
+            border-radius: calc(8px * var(--ui-scale));
             width: 90%;
-            max-width: 500px;
+            max-width: calc(500px * var(--ui-scale));
             box-shadow: 0 5px 15px #0000004d;
             will-change: transform, opacity;
-            border-top: 6px solid var(--modal-accent, #3498db)
+            border-top: calc(6px * var(--ui-scale)) solid var(--modal-accent, #3498db);
+            font-size: calc(1em * var(--ui-scale));
         }
 
         .modal-header {
@@ -425,29 +454,31 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #dee2e6;
-            padding-bottom: 15px;
-            margin-bottom: 15px
+            padding-bottom: calc(15px * var(--ui-scale));
+            margin-bottom: calc(15px * var(--ui-scale));
         }
 
         .modal-header h2 {
             margin: 0;
-            color: #2c3e50
+            color: #2c3e50;
+            font-size: calc(1.5em * var(--ui-scale));
         }
 
         .close-button {
             color: #aaa;
-            font-size: 28px;
+            font-size: calc(28px * var(--ui-scale));
             font-weight: 700;
-            cursor: pointer
+            cursor: pointer;
+            line-height: 1;
         }
 
         #close-modal {
             color: var(--modal-accent-contrast, #2c3e50);
-            font-size: 20px;
+            font-size: calc(20px * var(--ui-scale));
             font-weight: 700;
             cursor: pointer;
             user-select: none;
-            width: 36px;
+            width: calc(36px * var(--ui-scale));
             height: 36px;
             display: grid;
             place-items: center;
@@ -617,6 +648,10 @@
             <div id="modal-body"></div>
         </div>
     </div>
+    <div id="loader" aria-live="polite" aria-busy="true">
+        <div class="spinner" role="status" aria-label="Cargando"></div>
+        <div>Cargando horarios...</div>
+    </div>
     <script>
         const data = [{ "grupo": "1° A ENF", "salon": "A7", "dia": "Lunes", "hora_inicio": "14:30", "hora_fin": "15:20", "materia": "La materia y sus interacciones", "profesor": "Orozco Colin Asunción" }, { "grupo": "1° A ENF", "salon": "A7", "dia": "Lunes", "hora_inicio": "15:20", "hora_fin": "16:10", "materia": "La materia y sus interacciones", "profesor": "Orozco Colin Asunción" }];
          const horariosData = [{}];
@@ -644,6 +679,7 @@
        
         document.addEventListener('DOMContentLoaded', () => {
             const table = document.getElementById('schedule-table');
+            const loader = document.getElementById('loader');
             const modal = document.getElementById('class-modal');
             const daySelector = document.getElementById('day-selector');
             const viewSelector = document.getElementById('view-selector');
@@ -764,7 +800,7 @@
                         rowHTML += days.map(d => {
                             const classInfo = baseData.find(i => i.dia === d && i.hora_inicio === start && i.hora_fin === end);
                             if (!classInfo) return '<td></td>';
-                            return `<td data-time="${slot}" data-day="${d}"><div class="class-cell" style="background-color:${getColor(classInfo.profesor)}" data-index="${horariosData.indexOf(classInfo)}">
+                            return `<td data-time="${slot}" data-day="${d}"><div class="class-cell" style="background-color:${getColor(classInfo.materia)}" data-index="${horariosData.indexOf(classInfo)}">
                                         <span class="cell-group">${classInfo.grupo} • ${classInfo.salon}</span>
                                         <span class="cell-teacher">${getInitials(classInfo.profesor)}</span>
                                     </div></td>`;
@@ -795,7 +831,7 @@
                         const [start, end] = slot.split(' - ');
                         const classInfo = dayData.find(i => i.salon === room && i.hora_inicio === start && i.hora_fin === end);
                         if (!classInfo) return '<td></td>';
-                        return `<td data-time="${slot}"><div class="class-cell" style="background-color:${getColor(classInfo.profesor)}" data-index="${horariosData.indexOf(classInfo)}">
+                        return `<td data-time="${slot}"><div class="class-cell" style="background-color:${getColor(classInfo.materia)}" data-index="${horariosData.indexOf(classInfo)}">
                                     <span class="cell-group">${classInfo.grupo}</span>
                                     <span class="cell-teacher">${getInitials(classInfo.profesor)}</span>
                                 </div></td>`;
@@ -1010,6 +1046,7 @@
 
             // Cargar datos desde archivo JSON externo y renderizar día activo
             /* fetch('horarios.json') */
+            if (loader) loader.style.display = 'flex';
             fetch(API_URL)
                 .then(r => r.json())
                 .then(d => {
@@ -1062,9 +1099,11 @@
                         activeViewBtn ? activeViewBtn.dataset.view : 'dia',
                         groupSelect ? groupSelect.value : ''
                     );
+                    if (loader) loader.style.display = 'none';
                 })
                 .catch(() => {
                     // Si falla la carga, no interrumpe la app y se mantienen los datos embebidos
+                    if (loader) loader.style.display = 'none';
                 });
 
             // Sincronización bidireccional de filtros
@@ -1156,7 +1195,7 @@
                 if (!cell) return;
                 const info = horariosData[cell.dataset.index];
                 // establecer acento del modal basado en el color de la tarjeta
-                const accent = getColor(info.profesor);
+                const accent = getColor(info.materia);
                 const modalContent = modal.querySelector('.modal-content');
                 if (modalContent) {
                     modalContent.style.setProperty('--modal-accent', accent);
