@@ -365,6 +365,16 @@
             z-index: 1
         }
 
+        /* Columna de salones/primera columna más angosta (ajusta al contenido) */
+        thead th:first-child,
+        td.row-header {
+            min-width: unset; /* anula el min-width global de celdas */
+            width: 1%;
+            white-space: nowrap;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
         .class-cell {
             padding: calc(5px * var(--ui-scale));
             font-size: calc(.9em * var(--ui-scale));
